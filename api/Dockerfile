@@ -6,7 +6,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     && apt update \
     && apt install software-properties-common -y \
     && add-apt-repository ppa:deadsnakes/ppa -y \
-    && apt-get install libpq-dev gcc python3-dev python3-venv -y \
+    && apt-get install libpq-dev gcc python3-dev python3-venv vim -y \
     && useradd -ms /bin/bash api \
     && apt-get clean
 
@@ -29,6 +29,3 @@ USER api
 
 EXPOSE 5000
 ENTRYPOINT ["./boot.sh"]
-
-
-
