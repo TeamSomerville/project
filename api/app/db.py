@@ -1,6 +1,6 @@
 import psycopg2
 
-def connect():
+def connect(query):
     """ connect to the db"""
     conn  = None
     returnRow = None
@@ -13,21 +13,14 @@ def connect():
         )
 
         cur  = conn.cursor()
-
-        cur.execute("SELECT CityName, Country from City")
-
-        returnRow = cur.fetchone()
-        while row is not None:
-            print(row)
-            row = cur.fetchone()
-
+        cur.execute(query)
+        returnRow = cur.fetchall()
         cur.close()
     except Exception as ex:
         print (ex)
     finally:
         if conn is not None:
             conn.close()
-            print ("Database connection closed")
 
     return returnRow
 
