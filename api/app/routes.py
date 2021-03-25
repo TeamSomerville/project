@@ -32,8 +32,19 @@ def find_city_by_name():
     data  = request.json or {}
     query = "select cityid from public.find_cityid_byname('{}')".format(data["City"])
     dataset= connect(query)
-    #datadict = {}
-    #datadict["City"] = data[0]
-    #datadict["Country"] = data[1]
-    cityid = dataset[0][0]
-    return str(cityid)
+    datadict = {}
+    datadict["City"] = data["City"]
+    datadict["CityId"] = dataset[0][0]
+    json_data = json.dumps(datadict)
+    return json_data
+
+@app.route("/api/find_city_spotids", methods=["POST"])
+def find_city_spotids():
+    data  = request.json or {}
+    query = "select spotid from public.find_city_spotids('{}')".format(data["City"])
+    dataset= connect(query)
+    datadict = {}
+    datadict["City"] = data["City"]
+    datadict["SpotIds"] = [x[0] for x in dataset]
+    json_data = json.dumps(datadict)
+    return json_data
