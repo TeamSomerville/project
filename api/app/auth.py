@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for
 
-from . import db
+# from . import db
 
 auth = Blueprint('auth', __name__)
 
