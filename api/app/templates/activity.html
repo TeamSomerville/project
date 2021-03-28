@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+* {
+  box-sizing: border-box;
+}
+
+#myInput {
+  background-image: url('/css/searchicon.png');
+  background-position: 10px 10px;
+  background-repeat: no-repeat;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+#myTable {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid #ddd;
+  font-size: 18px;
+}
+
+#myTable th, #myTable td {
+  text-align: left;
+  padding: 12px;
+}
+
+#myTable tr {
+  border-bottom: 1px solid #ddd;
+}
+
+#myTable tr.header, #myTable tr:hover {
+  background-color: #66CCFF;
+}
+</style>
+
+<h3 class="title">Activity</h3>
+
+<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for activity names.." title="Type in a activity name">
+
+<table id="myTable">
+  <tr class="header">
+      <th style="width:30%;">Activity Name</th>
+      <th style="width:10%;">Image</th>
+      <th style="width:20%;">Brief instruction</th>
+      <th style="width:10%;">Rate(1-5)</th>
+      <th style="width:10%;">Cost(USD)</th>
+      <th style="width:10%;">Suggest Hours Spent</th>
+      <th style="width:10%;">Autism Friendly</th>
+  </tr>
+  <tr>
+    <td>San Francisco Zoo</td>
+    <td>Image</td>
+    <td>Brief instruction...</td>
+    <td>4</td>
+    <td>500</td>
+    <td>10</td>
+    <td>yes</td>
+  </tr>
+  <tr>
+    <td>Aquarium of the bay admission</td>
+    <td>Image</td>
+    <td>Brief instruction...</td>
+    <td>3</td>
+    <td>100</td>
+    <td>5</td>
+    <td>yes</td>
+  </tr>
+  <tr>
+    <td>San francisco Hop-On Hop-off 2 day pass</td>
+    <td>Image</td>
+    <td>Brief instruction...</td>
+    <td>2</td>
+    <td>1500</td>
+    <td>48</td>
+    <td>no</td>
+  </tr>
+  <tr>
+    <td>San Francisco Sightseeing Flex pass</td>
+    <td>Image</td>
+    <td>Brief instruction...</td>
+    <td>1</td>
+    <td>800</td>
+    <td>24</td>
+    <td>no</td>
+  </tr>
+  <tr>
+    <td>San Francisco CityPASS</td>
+    <td>Image</td>
+    <td>Brief instruction...</td>
+    <td>5</td>
+    <td>300</td>
+    <td>4</td>
+    <td>yes</td>
+  </tr>
+</table>
+
+<script>
+function myFunction() {
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("myInput");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("myTable");
+  tr = table.getElementsByTagName("tr");
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+</script>
+
+{% endblock %}
