@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve travel api
+After=network.target
+
+[Service]
+User=purviss2
+Group=nginx
+WorkingDirectory=/project/api
+Environment="PATH=/project/api/venv/bin"
+ExecStart=/project/api/venv/bin/gunicorn --workers 2 --bind 0.0.0.0:8000 travel:app
+
+[Install]
+WantedBy=multi-user.target
