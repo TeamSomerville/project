@@ -92,3 +92,28 @@ def add_new_user():
        datadict["ReturnCode"] = 200
     json_data = json.dumps(datadict)
     return json_data
+
+@main.route("/api/update_rating", methods=["POST"])
+def update_rating():
+    """ 
+    Input Json Example
+    {
+      "spotid": "96",
+      "rating": "5.0",
+    }
+    Return Json Example
+    {"ReturnCode": 200}
+    """
+    data  = request.json or {}
+    params = []
+    params.append((data["spotid"], "text"))
+    params.append((data["rating"], "text"))
+    sp = "update_rating"
+    dataset= call_sp(sp, params)
+    datadict = {}
+    if dataset is not None:
+       datadict["ReturnCode"] = dataset[0][0]
+    else:
+       datadict["ReturnCode"] = 200
+    json_data = json.dumps(datadict)
+    return json_data
