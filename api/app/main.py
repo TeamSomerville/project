@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request
-from app.db import connect
+from app.db import connect, call_sp
 import json
 main = Blueprint('main', __name__)
 
@@ -51,5 +51,44 @@ def find_city_cost():
     datadict["AvgHotelCost"] = dataset[0][0]
     datadict["AvgMealCost"] = dataset[0][1]
     datadict["AvgCarRental"] = dataset[0][2]
+    json_data = json.dumps(datadict)
+    return json_data
+
+@main.route("/api/add_new_user", methods=["POST"])
+def add_new_user():
+    """ 
+    Input Json Example
+    {
+      "username": "purvis",
+      "password": "password",
+      "createon": "2021/04/05T12:00:00",
+      "gender": "male",
+      "familyname": "test",
+      "givenname": "purvis",
+      "birthday": "1990-01-01",
+      "homecityid": "123",
+      "email": "test@test.com"
+    }
+    Return Json Example
+    {"ReturnCode": 200}
+    """
+    data  = request.json or {}
+    params = []
+    params.append((data["username"], "text"))
+    params.append((data["password"], "text"))
+    params.append((data["createon"], "text"))
+    params.append((data["gender"], "text"))
+    params.append((data["familyname"], "text"))
+    params.append((data["givenname"], "text"))
+    params.append((data["birthday"], "text"))
+    params.append((data["homecityid"], "text"))
+    params.append((data["email"], "text"))
+    sp = "add_new_user"
+    dataset= call_sp(sp, params)
+    datadict = {}
+    if dataset is not None:
+       datadict["ReturnCode"] = dataset[0][0]
+    else:
+       datadict["ReturnCode"] = 200
     json_data = json.dumps(datadict)
     return json_data
