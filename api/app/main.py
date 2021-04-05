@@ -41,6 +41,59 @@ def find_city_spotids():
     json_data = json.dumps(datadict)
     return json_data
 
+@main.route("/api/find_spot_details", methods=["POST"])
+def find_spot_details():
+    """ 
+    Input Json Example
+    {
+      "spotid": "96",
+    }
+    Return Json Example
+    {
+        "spotid": "96",
+        "spotname": "Pearl Harbor Aviation Museum",
+        "cityname": "Honolulu, HI",
+        "address": "319 Lexington Blvd, Honolulu, HI 96818",
+        "suggesthours": 8,
+        "cost": 25,
+        "autismfriendly": false,
+        "openday": true,
+        "opennight": false,
+        "rating": 4.604,
+        "introduction": "ctly to the attack on Pearl Harbor and World War II.",
+        "lat": 21.359744,
+        "lng": -157.961823,
+        "imgurl": "https://lh5.googleusercontent.com/p/AF1QipOye_AyHpDXGHbe2nJo3nLeoRNlOI0iagq2sg3X=w1920-h1080-k-no",
+        "website": "pearlharboraviationmuseum.org",
+        "category": "Museum",
+        "state": " HI"
+    }
+    """
+    data  = request.json or {}
+    query = "select spotname, cityname, address, suggesthours, cost, autismfriendly, openday, opennight, rating, introduction, lat, lng, imgurl, website, category, state from public.find_spot_details({})".format(data["spotid"])
+    dataset= connect(query)
+    datadict = {}
+    datadict["spotid"] = data["spotid"]
+    datadict["spotname"] = dataset[0][0]
+    datadict["cityname"] = dataset[0][1]
+    datadict["address"] = dataset[0][2]
+    datadict["suggesthours"] = dataset[0][3]
+    datadict["cost"] = dataset[0][4]
+    datadict["autismfriendly"] = dataset[0][5]
+    datadict["openday"] = dataset[0][6]
+    datadict["opennight"] = dataset[0][7]
+    datadict["rating"] = dataset[0][8]
+    datadict["introduction"] = dataset[0][9]
+    datadict["lat"] = dataset[0][10]
+    datadict["lng"] = dataset[0][11]
+    datadict["imgurl"] = dataset[0][12]
+    datadict["website"] = dataset[0][13]
+    datadict["category"] = dataset[0][14]
+    datadict["state"] = dataset[0][15]
+    json_data = json.dumps(datadict)
+    print (json_data)
+    return json_data
+
 @main.route("/api/find_city_cost", methods=["POST"])
 def find_city_cost():
     data  = request.json or {}
