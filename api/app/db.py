@@ -11,7 +11,17 @@ def call_sp(sp, params):
 	    password = "admin"
         )
         cur  = conn.cursor()
-        converted = ["'{}'".format(x) for (x,y) in params]
+        converted = []
+        for (x,y) in params:
+           if y == "text":
+             converted.append("'{}'".format(x))
+           elif y == "array":
+             aha = [str(z) for z in x]
+             temp = ",".join(aha)
+             converted.append("'{{{}}}'".format(temp))             
+           else:
+             raise ValueError("param datatype not specified")
+
         query = "CALL {0}({1});".format(sp, ",".join(converted))
         print (query)
         cur.execute(query)

@@ -21,23 +21,45 @@ def activity():
 
 @main.route("/api/find_city_by_name", methods=["POST"])
 def find_city_by_name():
+    """ 
+    Input Json Example
+    {
+      "city": "New York",
+    }
+    Return Json Example
+    {
+        "city": "New York",
+        "cityid": "1"
+    }
+    """
     data  = request.json or {}
-    query = "select cityid from public.find_cityid_byname('{}')".format(data["City"])
+    query = "select cityid from public.find_cityid_byname('{}')".format(data["city"])
     dataset= connect(query)
     datadict = {}
-    datadict["City"] = data["City"]
-    datadict["CityId"] = dataset[0][0]
+    datadict["city"] = data["city"]
+    datadict["cityid"] = dataset[0][0]
     json_data = json.dumps(datadict)
     return json_data
 
 @main.route("/api/find_city_spotids", methods=["POST"])
 def find_city_spotids():
+    """ 
+    Input Json Example
+    {
+      "city": "New York",
+    }
+    Return Json Example
+    {
+        "city": "New York",
+        "spotids": ["1", "2"]
+    }
+    """
     data  = request.json or {}
-    query = "select spotid from public.find_city_spotids('{}')".format(data["City"])
+    query = "select spotid from public.find_city_spotids('{}')".format(data["city"])
     dataset= connect(query)
     datadict = {}
-    datadict["City"] = data["City"]
-    datadict["SpotIds"] = [x[0] for x in dataset]
+    datadict["city"] = data["city"]
+    datadict["spotids"] = [x[0] for x in dataset]
     json_data = json.dumps(datadict)
     return json_data
 
@@ -96,24 +118,131 @@ def find_spot_details():
 
 @main.route("/api/find_city_cost", methods=["POST"])
 def find_city_cost():
+    """ 
+    Input Json Example
+    {
+      "cityid": 12,
+    }
+    Return Json Example
+    {
+        "avghotelcost": 123,
+        "avgmealcost": 1,
+        "avgcarrental": 123
+    }
+    """
     data  = request.json or {}
-    query = "select avghotelcost, avgmealcost, avgcarental from public.find_citycost({})".format(data["CityId"])
+    query = "select avghotelcost, avgmealcost, avgcarental from public.find_citycost({})".format(data["cityid"])
     dataset= connect(query)
     datadict = {}
-    datadict["CityId"] = data["CityId"]
-    datadict["AvgHotelCost"] = dataset[0][0]
-    datadict["AvgMealCost"] = dataset[0][1]
-    datadict["AvgCarRental"] = dataset[0][2]
+    datadict["avghotelcost"] = dataset[0][0]
+    datadict["avgmealcost"] = dataset[0][1]
+    datadict["avgcarrental"] = dataset[0][2]
     json_data = json.dumps(datadict)
     return json_data
 
 @main.route("/api/find_user_id", methods=["POST"])
 def find_user_id():
+    """ 
+    Input Json Example
+    {
+      "username": "purvis",
+      "password": "password"
+    }
+    Return Json Example
+    {"userid": 3}
+    """
     data  = request.json or {}
     query = "select userid from find_userid('{0}', '{1}')".format(data["username"], data["password"])
     dataset= connect(query)
     datadict = {}
     datadict["userid"] = dataset[0][0]
+    json_data = json.dumps(datadict)
+    return json_data
+
+@main.route("/api/find_flight_id", methods=["POST"])
+def find_flight_id():
+    """ 
+    Input Json Example
+    {
+      "fromcity": "Aberdeen, SD",
+      "tocity": "Minneapolis, MN"
+    }
+    Return Json Example
+    {"flightid": 3}
+    """
+    data  = request.json or {}
+    query = "select flightid from find_flightid('{0}', '{1}')".format(data["fromcity"], data["tocity"])
+    dataset= connect(query)
+    datadict = {}
+    datadict["flightid"] = dataset[0][0]
+    json_data = json.dumps(datadict)
+    return json_data
+
+@main.route("/api/find_flight_duration", methods=["POST"])
+def find_flight_duration():
+    """ 
+    Input Json Example
+    {
+      "flightid": "3",
+    }
+    Return Json Example
+    {"duration": 3}
+    """
+    data  = request.json or {}
+    query = "select duration from find_flight_duration('{0}')".format(data["flightid"])
+    dataset= connect(query)
+    datadict = {}
+    datadict["duration"] = dataset[0][0]
+    json_data = json.dumps(datadict)
+    return json_data
+
+@main.route("/api/find_flight_cost", methods=["POST"])
+def find_flight_cost():
+    """ 
+    Input Json Example
+    {
+      "flightid": "3",
+    }
+    Return Json Example
+    {"avgcost": 3}
+    """
+    data  = request.json or {}
+    query = "select avgcost from find_flight_cost('{0}')".format(data["flightid"])
+    dataset= connect(query)
+    datadict = {}
+    datadict["avgcost"] = dataset[0][0]
+    json_data = json.dumps(datadict)
+    return json_data
+
+@main.route("/api/find_saved_trips", methods=["POST"])
+def find_saved_trips():
+    """ 
+    Input Json Example
+    {
+      "userid": 3
+    }
+    Return Json Example
+    {"avgcost": 3}
+    """
+    data  = request.json or {}
+    query = "select avgcost from find_flight_cost('{0}')".format(data["flightid"])
+    dataset= connect(query)
+    datadict = {}
+    datadict["avgcost"] = dataset[0][0]
+    json_data = json.dumps(datadict)
+    return json_data
+
+@main.route("/api/find_destinations", methods=["GET"])
+def find_destinations():
+    """ 
+    Return Json Example
+    {"cities": ["New York", "Boston"]}
+    """
+    query = "select names from find_destinations()"
+    dataset= connect(query)
+    datadict = {}
+    converted = [x[0] for x in dataset]
+    datadict["cities"] = converted
     json_data = json.dumps(datadict)
     return json_data
 
@@ -173,6 +302,89 @@ def update_rating():
     params.append((data["rating"], "text"))
     sp = "update_rating"
     dataset= call_sp(sp, params)
+    datadict = {}
+    if dataset is not None:
+       datadict["ReturnCode"] = dataset[0][0]
+    else:
+       datadict["ReturnCode"] = 200
+    json_data = json.dumps(datadict)
+    return json_data
+
+def add_user_trip(userid):
+    data  = request.json or {}
+    params = []
+    params.append((userid, "text"))
+    sp = "add_usertrip"
+    dataset= call_sp(sp, params)
+
+@main.route("/api/delete_usertrip", methods=["POST"])
+def delete_usertrip():
+    """ 
+    Input Json Example
+    {
+      "userid": 96,
+      "tripid": 12,
+    }
+    Return Json Example
+    {"ReturnCode": 200}
+    """
+    data  = request.json or {}
+    params = []
+    params.append((data["userid"], "text"))
+    params.append((data["tripid"], "text"))
+    sp = "delete_usertrip"
+    dataset= call_sp(sp, params)
+    datadict = {}
+    if dataset is not None:
+       datadict["ReturnCode"] = dataset[0][0]
+    else:
+       datadict["ReturnCode"] = 200
+    json_data = json.dumps(datadict)
+    return json_data
+
+@main.route("/api/save_trip", methods=["POST"])
+def save_trip():
+    """ 
+    Input Json Example
+    {
+      "userid": 96,
+      "totalduration": 96,
+      "totalcost": 96,
+      "activityduration": 96,
+      "activitycost": 96,
+      "transportationtime": 96,
+      "transportationcost": 96,
+      "staycost": 96,
+      "foodcost": 96,
+      "toflightid": 96,
+      "backflightid": 96,
+      "suggestdays": 96,
+      "suggestroutine": [96, 23, 34]
+    }
+    Return Json Example
+    {"ReturnCode": 200}
+    """
+    data  = request.json or {}
+    params = []
+    params.append((data["userid"], "text"))
+    params.append((data["totalduration"], "text"))
+    params.append((data["totalcost"], "text"))
+    params.append((data["activityduration"], "text"))
+    params.append((data["activitycost"], "text"))
+    params.append((data["transportationtime"], "text"))
+    params.append((data["transportationcost"], "text"))
+    params.append((data["staycost"], "text"))
+    params.append((data["foodcost"], "text"))
+    params.append((data["toflightid"], "text"))
+    params.append((data["backflightid"], "text"))
+    params.append((data["suggestdays"], "text"))
+    params.append((data["suggestroutine"], "array"))
+    sp = "save_trip"
+    dataset= call_sp(sp, params)
+
+    #calling add_usertrip
+    add_user_trip(data["userid"])
+
     datadict = {}
     if dataset is not None:
        datadict["ReturnCode"] = dataset[0][0]
