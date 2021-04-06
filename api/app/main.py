@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request
-from app.db import connect, call_sp
+from app.db import connect, call_sp, call_fn
 import json
 main = Blueprint('main', __name__)
 
@@ -332,10 +332,10 @@ def update_rating():
     json_data = json.dumps(datadict)
     return json_data
 
-def add_user_trip(userid):
-    data  = request.json or {}
+def add_user_trip(userid, tripid):
     params = []
     params.append((userid, "text"))
+    params.append((tripid, "text"))
     sp = "add_usertrip"
     dataset= call_sp(sp, params)
 
@@ -424,16 +424,15 @@ def save_trip():
     params.append((data["backflightid"], "text"))
     params.append((data["suggestdays"], "text"))
     params.append((data["suggestroutine"], "array"))
-    sp = "save_trip"
-    dataset= call_sp(sp, params)
+    fn = "save_trip"
+    dataset= call_fn(fn, params)
 
     #calling add_usertrip
-    add_user_trip(data["userid"])
+    tripid = dataset[0][0]
+    print (tripid)
+    add_user_trip(data["userid"], tripid)
 
     datadict = {}
-    if dataset is not None:
-       datadict["ReturnCode"] = dataset[0][0]
-    else:
-       datadict["ReturnCode"] = 200
+    datadict["ReturnCode"] = 200
     json_data = json.dumps(datadict)
     return json_data
