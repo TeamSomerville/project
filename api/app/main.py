@@ -109,11 +109,39 @@ def find_city_cost():
 
 @main.route("/api/find_user_id", methods=["POST"])
 def find_user_id():
+    """ 
+    Input Json Example
+    {
+      "username": "purvis",
+      "password": "password"
+    }
+    Return Json Example
+    {"userid": 3}
+    """
     data  = request.json or {}
     query = "select userid from find_userid('{0}', '{1}')".format(data["username"], data["password"])
     dataset= connect(query)
     datadict = {}
     datadict["userid"] = dataset[0][0]
+    json_data = json.dumps(datadict)
+    return json_data
+
+@main.route("/api/find_flight_id", methods=["POST"])
+def find_flight_id():
+    """ 
+    Input Json Example
+    {
+      "fromcity": "Aberdeen, SD",
+      "tocity": "Minneapolis, MN"
+    }
+    Return Json Example
+    {"flightid": 3}
+    """
+    data  = request.json or {}
+    query = "select flightid from find_flightid('{0}', '{1}')".format(data["fromcity"], data["tocity"])
+    dataset= connect(query)
+    datadict = {}
+    datadict["flightid"] = dataset[0][0]
     json_data = json.dumps(datadict)
     return json_data
 
