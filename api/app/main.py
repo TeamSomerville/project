@@ -163,6 +163,24 @@ def find_flight_duration():
     json_data = json.dumps(datadict)
     return json_data
 
+@main.route("/api/find_flight_cost", methods=["POST"])
+def find_flight_cost():
+    """ 
+    Input Json Example
+    {
+      "flightid": "3",
+    }
+    Return Json Example
+    {"avgcost": 3}
+    """
+    data  = request.json or {}
+    query = "select avgcost from find_flight_cost('{0}')".format(data["flightid"])
+    dataset= connect(query)
+    datadict = {}
+    datadict["avgcost"] = dataset[0][0]
+    json_data = json.dumps(datadict)
+    return json_data
+
 @main.route("/api/add_new_user", methods=["POST"])
 def add_new_user():
     """ 
