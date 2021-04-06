@@ -214,6 +214,24 @@ def find_flight_cost():
     json_data = json.dumps(datadict)
     return json_data
 
+@main.route("/api/find_saved_trips", methods=["POST"])
+def find_saved_trips():
+    """ 
+    Input Json Example
+    {
+      "userid": 3
+    }
+    Return Json Example
+    {"avgcost": 3}
+    """
+    data  = request.json or {}
+    query = "select avgcost from find_flight_cost('{0}')".format(data["flightid"])
+    dataset= connect(query)
+    datadict = {}
+    datadict["avgcost"] = dataset[0][0]
+    json_data = json.dumps(datadict)
+    return json_data
+
 @main.route("/api/find_destinations", methods=["GET"])
 def find_destinations():
     """ 
