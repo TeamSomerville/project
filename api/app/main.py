@@ -292,28 +292,12 @@ def update_rating():
     json_data = json.dumps(datadict)
     return json_data
 
-@main.route("/api/add_user_trip", methods=["POST"])
-def add_user_trip():
-    """ 
-    Input Json Example
-    {
-      "userid": 96
-    }
-    Return Json Example
-    {"ReturnCode": 200}
-    """
+def add_user_trip(userid):
     data  = request.json or {}
     params = []
-    params.append((data["userid"], "text"))
+    params.append((userid, "text"))
     sp = "add_usertrip"
     dataset= call_sp(sp, params)
-    datadict = {}
-    if dataset is not None:
-       datadict["ReturnCode"] = dataset[0][0]
-    else:
-       datadict["ReturnCode"] = 200
-    json_data = json.dumps(datadict)
-    return json_data
 
 @main.route("/api/delete_usertrip", methods=["POST"])
 def delete_usertrip():
@@ -379,6 +363,10 @@ def save_trip():
     params.append((data["suggestroutine"], "array"))
     sp = "save_trip"
     dataset= call_sp(sp, params)
+
+    #calling add_usertrip
+    add_user_trip(data["userid"])
+
     datadict = {}
     if dataset is not None:
        datadict["ReturnCode"] = dataset[0][0]
