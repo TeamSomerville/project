@@ -342,6 +342,29 @@ def delete_usertrip():
     json_data = json.dumps(datadict)
     return json_data
 
+@main.route("/api/delete_trip", methods=["POST"])
+def delete_trip():
+    """ 
+    Input Json Example
+    {
+      "tripid": 1
+    }
+    Return Json Example
+    {"ReturnCode": 200}
+    """
+    data  = request.json or {}
+    params = []
+    params.append((data["tripid"], "text"))
+    sp = "delete_trip"
+    dataset= call_sp(sp, params)
+    datadict = {}
+    if dataset is not None:
+       datadict["ReturnCode"] = dataset[0][0]
+    else:
+       datadict["ReturnCode"] = 200
+    json_data = json.dumps(datadict)
+    return json_data
+
 @main.route("/api/save_trip", methods=["POST"])
 def save_trip():
     """ 
