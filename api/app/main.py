@@ -225,11 +225,12 @@ def find_saved_trips():
     {"avgcost": 3}
     """
     data  = request.json or {}
-    query = "select savetripids from find_saved_trips({0})".format(data["userid"])
+    query = "select savedtripids from find_saved_trips({0})".format(data["userid"])
     dataset= connect(query)
+    aha = dataset[0]
     datadict = {}
     trips = []
-    for (x,y) in dataset:
+    for x in aha[0]:
       #get trip details
       details = find_trip_details(x)
       trip = {}
