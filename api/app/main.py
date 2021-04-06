@@ -232,6 +232,28 @@ def find_saved_trips():
     json_data = json.dumps(datadict)
     return json_data
 
+@main.route("/api/cal_spots", methods=["POST"])
+def cal_spots():
+    """ 
+    Input Json Example
+    {
+      "spotids": [3,4,5]
+    }
+    Return Json Example
+    {"totalcost": 3,
+     "totalhours": 4}
+    """
+    data  = request.json or {}
+    temp = [str(z) for z in data["spotids"]]
+    converted = ",".join(temp)
+    query = "select totalcost, totalhours from cal_spots('{{{}}}')".format(converted)
+    dataset= connect(query)
+    datadict = {}
+    datadict["totalcost"] = dataset[0][0]
+    datadict["totalhours"] = dataset[0][1]
+    json_data = json.dumps(datadict)
+    return json_data
+
 @main.route("/api/find_destinations", methods=["GET"])
 def find_destinations():
     """ 
