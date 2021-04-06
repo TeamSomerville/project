@@ -12,17 +12,13 @@ def call_sp(sp, params):
         )
         cur  = conn.cursor()
         converted = []
-        print ("test")
         for (x,y) in params:
            if y == "text":
-             print ("text {}".format(x))
              converted.append("'{}'".format(x))
-             print ("text printed")
            elif y == "array":
-             print ("array {}".format(x))
-             temp = ",".join(x)
+             aha = [str(z) for z in x]
+             temp = ",".join(aha)
              converted.append("'{{{}}}'".format(temp))             
-             print ("array printed")
            else:
              raise ValueError("param datatype not specified")
 
