@@ -107,6 +107,16 @@ def find_city_cost():
     json_data = json.dumps(datadict)
     return json_data
 
+@main.route("/api/find_user_id", methods=["POST"])
+def find_user_id():
+    data  = request.json or {}
+    query = "select userid from find_userid('{0}', '{1}')".format(data["username"], data["password"])
+    dataset= connect(query)
+    datadict = {}
+    datadict["userid"] = dataset[0][0]
+    json_data = json.dumps(datadict)
+    return json_data
+
 @main.route("/api/add_new_user", methods=["POST"])
 def add_new_user():
     """ 
