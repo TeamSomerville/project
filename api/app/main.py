@@ -225,12 +225,38 @@ def find_saved_trips():
     {"avgcost": 3}
     """
     data  = request.json or {}
-    query = "select avgcost from find_flight_cost('{0}')".format(data["flightid"])
+    query = "select savetripids from find_saved_trips({0})".format(data["userid"])
     dataset= connect(query)
     datadict = {}
-    datadict["avgcost"] = dataset[0][0]
+    trips = []
+    for (x,y) in dataset:
+      #get trip details
+      details = find_trip_details(x)
+      trip = {}
+      trip["tripid"] = x
+      trip["totalduration"] = details[1]
+      trip["totalcost"] = details[2]
+      trip["activityduration"] = details[3]
+      trip["activitycost"] = details[4]
+      trip["transportationtime"] = details[5]
+      trip["transportationcost"] = details[6]
+      trip["staycost"] = details[7]
+      trip["foodcost"] = details[8]
+      trip["toflightid"] = details[9]
+      trip["backflightid"] = details[10]
+      trip["suggestdays"] = details[11]
+      trip["suggestroutine"] = details[12]
+      trips.append(trip)
+        
+    datadict["trips"] = trips
     json_data = json.dumps(datadict)
     return json_data
+
+def find_trip_details(tripid):
+    query = "select userid,totalduration,totalcost,activityduration,activitycost,transportationtime,transportationcost,staycost,foodcost,toflightid,backflightid,suggestdays,suggestroutine from find_tripdetail({})".format(tripid)
+    dataset= connect(query)
+    returnList = [dataset[0][i] for i in range(13)] 
+    return returnList
 
 @main.route("/api/cal_spots", methods=["POST"])
 def cal_spots():
@@ -429,7 +455,6 @@ def save_trip():
 
     #calling add_usertrip
     tripid = dataset[0][0]
-    print (tripid)
     add_user_trip(data["userid"], tripid)
 
     datadict = {}
