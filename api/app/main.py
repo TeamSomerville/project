@@ -181,6 +181,20 @@ def find_flight_cost():
     json_data = json.dumps(datadict)
     return json_data
 
+@main.route("/api/find_destinations", methods=["GET"])
+def find_destinations():
+    """ 
+    Return Json Example
+    {"cities": ["New York", "Boston"]}
+    """
+    query = "select names from find_destinations()"
+    dataset= connect(query)
+    datadict = {}
+    converted = [x[0] for x in dataset]
+    datadict["cities"] = converted
+    json_data = json.dumps(datadict)
+    return json_data
+
 @main.route("/api/add_new_user", methods=["POST"])
 def add_new_user():
     """ 
