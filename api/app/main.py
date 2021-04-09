@@ -26,6 +26,29 @@ def profile():
     table = SubTable(items)
     return render_template("profile.html", table=table)
 
+@main.route('/update_rating')
+def ui_update_rating():
+    query = {"spotid":96}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
+    data = json.loads(response.text)
+    items = [dict(spotid=data["spotid"],
+                 spotname=data["spotname"],
+                 cityname=data["cityname"],
+                 address=data["address"],
+                 rating=data["rating"])]
+    # Declare your table
+    class SubTable(Table):
+        border = "Yes"
+        spotid = Col("Spot ID")
+        spotname = Col("Spot Name")
+        cityname = Col("City Name")
+        address = Col("Address")
+        rating = Col("Rating")
+       
+    # Populate the table
+    table = SubTable(items)
+    return render_template("update.html", table=table)
+
 @main.route('/destination')
 def destination():
     return render_template('destination.html')
