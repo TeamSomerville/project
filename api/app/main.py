@@ -214,7 +214,7 @@ def find_flight_cost():
     json_data = json.dumps(datadict)
     return json_data
 
-@main.route("/api/find_saved_trips", methods=["POST"])
+@main.route("/api/find_saved_trips", methods=["GET","POST"])
 def find_saved_trips():
     """ 
     Input Json Example
