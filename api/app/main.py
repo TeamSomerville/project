@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request
+from flask_table import Table, Col,LinkCol
 from app.db import connect, call_sp, call_fn
 import json
+import requests
 main = Blueprint('main', __name__)
 
 @main.route('/')
@@ -9,7 +11,20 @@ def index():
 
 @main.route('/profile')
 def profile():
-    return render_template('profile.html')
+    query = {"userid":11}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    data = json.loads(response.text)
+    ids = []
+    for i in range(len(data["trips"])):
+        ids.append(data["trips"][i]["tripid"])
+    # Declare your table
+    class SubTable(Table):
+        tripid = Col("Trip ID")
+    #def update_rate()
+    items = [dict(tripid=id_) for id_ in ids]
+    # Populate the table
+    table = SubTable(items)
+    return render_template("profile.html", table=table)
 
 @main.route('/destination')
 def destination():
