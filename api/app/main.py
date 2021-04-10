@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
 from flask_table import Table, Col,LinkCol
 from app.db import connect, call_sp, call_fn
+from app.forms import UpdateRatingForm
 import json
 import requests
 main = Blueprint('main', __name__)
@@ -26,28 +27,34 @@ def profile():
     table = SubTable(items)
     return render_template("profile.html", table=table)
 
-@main.route('/update_rating')
+@main.route('/update_rating', methods=["POST", "GET"])
 def ui_update_rating():
+    form = UpdateRatingForm()
+    if form.validate_on_submit():
+       query = {"spotid": "96", "rating": form.rating.data}
+       response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/update_rating", json=query)
+       print (response.text)
+
     query = {"spotid":96}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
     data = json.loads(response.text)
     items = [dict(spotid=data["spotid"],
-                 spotname=data["spotname"],
-                 cityname=data["cityname"],
-                 address=data["address"],
-                 rating=data["rating"])]
+	     spotname=data["spotname"],
+	     cityname=data["cityname"],
+	     address=data["address"],
+	     rating=data["rating"])]
     # Declare your table
     class SubTable(Table):
-        border = "Yes"
-        spotid = Col("Spot ID")
-        spotname = Col("Spot Name")
-        cityname = Col("City Name")
-        address = Col("Address")
-        rating = Col("Rating")
-       
-    # Populate the table
+       border = "Yes"
+       spotid = Col("Spot ID")
+       spotname = Col("Spot Name")
+       cityname = Col("City Name")
+       address = Col("Address")
+       rating = Col("Rating")
+           
+       # Populate the table
     table = SubTable(items)
-    return render_template("update.html", table=table)
+    return render_template("update.html", form=form, table=table)
 
 @main.route('/destination')
 def destination():
