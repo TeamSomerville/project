@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request
-from flask_table import Table, Col,LinkCol
+from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
 from app.forms import UpdateRatingForm
 import json
@@ -10,19 +10,29 @@ main = Blueprint('main', __name__)
 def index():
     return render_template('index.html')
 
-@main.route('/profile')
+@main.route("/item/int:userid> <int:tripid>", methods=["GET", "POST"])
+def deleteusertrip(tripid):
+    userid_=11
+    query = {"userid":userid_,"tripid":tripid}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/delete_usertrip", json=query)
+    return profile()
+
+@main.route("/profile")
 def profile():
-    query = {"userid":11}
+    userid_ = 11
+    query = {"userid":userid_}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
     data = json.loads(response.text)
     ids = []
     for i in range(len(data["trips"])):
         ids.append(data["trips"][i]["tripid"])
     # Declare your table
+    userid = Col("userid")
     class SubTable(Table):
         tripid = Col("Trip ID")
+        delete = ButtonCol("delete","main.deleteusertrip",url_kwargs=dict(userid="userid",tripid="tripid"))
     #def update_rate()
-    items = [dict(tripid=id_) for id_ in ids]
+    items = [dict(tripid=id_,userid=userid_) for id_ in ids]
     # Populate the table
     table = SubTable(items)
     return render_template("profile.html", table=table)
