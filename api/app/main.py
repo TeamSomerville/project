@@ -1,15 +1,108 @@
 from flask import Blueprint, render_template, request
+from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
+from app.forms import UpdateRatingForm, SaveTripForm
 import json
+import requests
 main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
     return render_template('index.html')
 
-@main.route('/profile')
+@main.route("/item/int:userid> <int:tripid>", methods=["GET", "POST"])
+def deleteusertrip(tripid):
+    userid_=11
+    query = {"userid":userid_,"tripid":tripid}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/delete_usertrip", json=query)
+    return profile()
+
+@main.route("/profile")
 def profile():
-    return render_template('profile.html')
+    userid_ = 11
+    query = {"userid":userid_}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    data = json.loads(response.text)
+    ids = []
+    for i in range(len(data["trips"])):
+        ids.append(data["trips"][i]["tripid"])
+    # Declare your table
+    userid = Col("userid")
+    class SubTable(Table):
+        tripid = Col("Trip ID")
+        delete = ButtonCol("delete","main.deleteusertrip",url_kwargs=dict(userid="userid",tripid="tripid"))
+    #def update_rate()
+    items = [dict(tripid=id_,userid=userid_) for id_ in ids]
+    # Populate the table
+    table = SubTable(items)
+    return render_template("profile.html", table=table)
+
+@main.route('/update_rating', methods=["POST", "GET"])
+def ui_update_rating():
+    form = UpdateRatingForm()
+    if form.validate_on_submit():
+       query = {"spotid": "96", "rating": form.rating.data}
+       response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/update_rating", json=query)
+
+    query = {"spotid":96}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
+    data = json.loads(response.text)
+    items = [dict(spotid=data["spotid"],
+	     spotname=data["spotname"],
+	     cityname=data["cityname"],
+	     address=data["address"],
+	     rating=data["rating"])]
+    # Declare your table
+    class SubTable(Table):
+       border = "Yes"
+       spotid = Col("Spot ID")
+       spotname = Col("Spot Name")
+       cityname = Col("City Name")
+       address = Col("Address")
+       rating = Col("Rating")
+           
+       # Populate the table
+    table = SubTable(items)
+    return render_template("update.html", form=form, table=table)
+
+@main.route('/save_trip', methods=["POST", "GET"])
+def ui_save_trip():
+    form = SaveTripForm()
+    if form.validate_on_submit():
+       query =  {
+	      "userid": 11,
+	      "totalduration": form.totalduration.data,
+	      "totalcost": 96,
+	      "activityduration": 96,
+	      "activitycost": 96,
+	      "transportationtime": 96,
+	      "transportationcost": 96,
+	      "staycost": 96,
+	      "foodcost": 96,
+	      "toflightid": 96,
+	      "backflightid": 96,
+	      "suggestdays": 96,
+	      "suggestroutine": [96, 23, 34]
+	    }
+       response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
+
+    query = {"userid": 11}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    data = json.loads(response.text)
+    items = []
+    for trip in data["trips"]:
+       item = dict(tripid=trip["tripid"],
+                   totalduration=trip["totalduration"])
+       items.append(item)
+    # Declare your table
+    class SubTable(Table):
+       border = "Yes"
+       tripid = Col("Trip ID")
+       totalduration = Col("Total Duration")
+           
+       # Populate the table
+    table = SubTable(items)
+    return render_template("trip.html", form=form, table=table)
 
 @main.route('/destination')
 def destination():
