@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request
 from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
-from app.forms import UpdateRatingForm
+from app.forms import UpdateRatingForm, SaveTripForm
 import json
 import requests
 main = Blueprint('main', __name__)
@@ -43,7 +43,6 @@ def ui_update_rating():
     if form.validate_on_submit():
        query = {"spotid": "96", "rating": form.rating.data}
        response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/update_rating", json=query)
-       print (response.text)
 
     query = {"spotid":96}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
@@ -65,6 +64,45 @@ def ui_update_rating():
        # Populate the table
     table = SubTable(items)
     return render_template("update.html", form=form, table=table)
+
+@main.route('/save_trip', methods=["POST", "GET"])
+def ui_save_trip():
+    form = SaveTripForm()
+    if form.validate_on_submit():
+       query =  {
+	      "userid": 11,
+	      "totalduration": form.totalduration.data,
+	      "totalcost": 96,
+	      "activityduration": 96,
+	      "activitycost": 96,
+	      "transportationtime": 96,
+	      "transportationcost": 96,
+	      "staycost": 96,
+	      "foodcost": 96,
+	      "toflightid": 96,
+	      "backflightid": 96,
+	      "suggestdays": 96,
+	      "suggestroutine": [96, 23, 34]
+	    }
+       response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
+
+    query = {"userid": 11}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    data = json.loads(response.text)
+    items = []
+    for trip in data["trips"]:
+       item = dict(tripid=trip["tripid"],
+                   totalduration=trip["totalduration"])
+       items.append(item)
+    # Declare your table
+    class SubTable(Table):
+       border = "Yes"
+       tripid = Col("Trip ID")
+       totalduration = Col("Total Duration")
+           
+       # Populate the table
+    table = SubTable(items)
+    return render_template("trip.html", form=form, table=table)
 
 @main.route('/destination')
 def destination():
