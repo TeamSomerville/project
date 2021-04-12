@@ -110,7 +110,36 @@ def destination():
 
 @main.route('/activity')
 def activity():
-    return render_template('activity.html')
+    query = {'city':'Honolulu, HI'}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_city_spotids", json=query)
+    data = json.loads(response.text)
+    spotids = data['spotids']
+    spotname = []
+    for spotid in spotids[:5]:
+      query = {'spotid':spotid}
+      request = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
+      details = json.loads(request.text)
+      spotname.append(details["spotname"])
+    return render_template('activity.html',data = spotname)
+    
+@main.route("/front_savetrip")
+def front_savetrip():
+    query = {"userid":11,
+         "totalduration":22,
+         "totalcost":33,
+         "activityduration":44,
+         "activitycost":55,
+         "transportationtime":11,
+         "transportationcost":32,
+         "staycost":12,
+         "foodcost":32,
+         "toflightid":226,
+         "backflightid":2276,
+         "suggestdays":4,
+         "suggestroutine":[99,98,97]
+        }
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
+    return activity()
 
 @main.route("/api/find_city_by_name", methods=["POST"])
 def find_city_by_name():
