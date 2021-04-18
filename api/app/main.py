@@ -108,6 +108,10 @@ def ui_save_trip():
 def destination():
     return render_template('destination.html')
 
+@main.route('/jquery')
+def jquery():
+    return render_template('jquery.html')
+
 @main.route('/activity')
 def activity():
     query = {'city':'Honolulu, HI'}
@@ -347,6 +351,7 @@ def find_saved_trips():
     {"avgcost": 3}
     """
     data  = request.json or {}
+    print ("debug: data is {}".format(data))
     query = "select savedtripids from find_saved_trips({0})".format(data["userid"])
     dataset= connect(query)
     aha = dataset[0]
