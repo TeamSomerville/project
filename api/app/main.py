@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request
 from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
 from app.forms import UpdateRatingForm, SaveTripForm
-from app.nosql import connect
+from app.nosql import getCollection
 import json
 import requests
 main = Blueprint('main', __name__)
@@ -175,7 +175,7 @@ def find_mongo_collection():
     }
     """
     data  = request.json or {}
-    dataset= connect(data["collection"])
+    dataset= getCollection(data["collection"])
     datadict = {}
     datadict["type"] = "FeatureCollection"
     datadict["features"] = [x for x in dataset]

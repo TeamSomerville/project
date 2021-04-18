@@ -1,6 +1,6 @@
 import pymongo
 
-def connect(collection):
+def getCollection(collection):
    client = pymongo.MongoClient("mongodb://localhost:27017/")
    
    db = client["geo"]
