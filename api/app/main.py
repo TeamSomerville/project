@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request
 from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
 from app.forms import UpdateRatingForm, SaveTripForm
+from app.nosql import connect
 import json
 import requests
 main = Blueprint('main', __name__)
@@ -144,6 +145,27 @@ def front_savetrip():
         }
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
     return activity()
+
+@main.route("/api/find_mongo_collection", methods=["POST"])
+def find_mongo_collection():
+    """ 
+    Input Json Example
+    {
+      "collection": "test",
+    }
+    Return Json Example
+    {
+        "city": "New York",
+        "cityid": "1"
+    }
+    """
+    data  = request.json or {}
+    dataset= connect(data["collection"])
+    datadict = {}
+    datadict["type"] = "FeatureCollection"
+    datadict["features"] = [x for x in dataset]
+    json_data = json.dumps(datadict)
+    return json_data
 
 @main.route("/api/find_city_by_name", methods=["POST"])
 def find_city_by_name():
