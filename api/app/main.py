@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request
 from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
 from app.forms import UpdateRatingForm, SaveTripForm
+from app.nosql import connect
 import json
 import requests
 main = Blueprint('main', __name__)
@@ -108,6 +109,10 @@ def ui_save_trip():
 def destination():
     return render_template('destination.html')
 
+@main.route('/map')
+def map():
+    return render_template('map.html')
+
 @main.route('/activity')
 def activity():
     query = {'city':'Honolulu, HI'}
@@ -140,6 +145,42 @@ def front_savetrip():
         }
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
     return activity()
+
+@main.route("/api/find_mongo_collection", methods=["POST"])
+def find_mongo_collection():
+    """ 
+    Input Json Example
+    {
+      "collection": "FeatureCollection",
+    }
+    Return Json Example
+    {
+       "type": "FeatureCollection",
+       "features": [
+           {
+               "type": "Feature",
+               "id": "7f7bef66-8957-406d-82a2-6aa1abe39f6d",
+               "geometry": {
+                   "type": "Point",
+                   "coordinates": [
+                       77.43785851,
+                       45.18766302
+                   ]
+               },
+               "properties": {
+                   "name": "this is a test"
+               }
+           }
+       ]
+    }
+    """
+    data  = request.json or {}
+    dataset= connect(data["collection"])
+    datadict = {}
+    datadict["type"] = "FeatureCollection"
+    datadict["features"] = [x for x in dataset]
+    json_data = json.dumps(datadict)
+    return json_data
 
 @main.route("/api/find_city_by_name", methods=["POST"])
 def find_city_by_name():
@@ -347,6 +388,7 @@ def find_saved_trips():
     {"avgcost": 3}
     """
     data  = request.json or {}
+    print ("debug: data is {}".format(data))
     query = "select savedtripids from find_saved_trips({0})".format(data["userid"])
     dataset= connect(query)
     aha = dataset[0]
