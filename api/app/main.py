@@ -109,9 +109,9 @@ def ui_save_trip():
 def destination():
     return render_template('destination.html')
 
-@main.route('/jquery')
-def jquery():
-    return render_template('jquery.html')
+@main.route('/map')
+def map():
+    return render_template('map.html')
 
 @main.route('/activity')
 def activity():
@@ -151,12 +151,27 @@ def find_mongo_collection():
     """ 
     Input Json Example
     {
-      "collection": "test",
+      "collection": "FeatureCollection",
     }
     Return Json Example
     {
-        "city": "New York",
-        "cityid": "1"
+       "type": "FeatureCollection",
+       "features": [
+           {
+               "type": "Feature",
+               "id": "7f7bef66-8957-406d-82a2-6aa1abe39f6d",
+               "geometry": {
+                   "type": "Point",
+                   "coordinates": [
+                       77.43785851,
+                       45.18766302
+                   ]
+               },
+               "properties": {
+                   "name": "this is a test"
+               }
+           }
+       ]
     }
     """
     data  = request.json or {}

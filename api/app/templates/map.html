@@ -34,70 +34,20 @@
          attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
      });
      tiles.addTo(map);
-     var marker = L.marker([51.5, -0.09]).addTo(map);
-     var myGeoJSON = {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "id": "7f7bef66-8957-406d-82a2-6aa1abe39f6d",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.43785851,
-          45.18766302
-        ]
-      },
-      "properties": {
-        "name": "this is a test"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "509c9f71-92ab-41ab-9d83-66cdf20e41e8",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          97.05544933,
-          10.10024187
-        ]
-      },
-      "properties": {
-        "aha": "assss",
-        "name": "aha"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "2c51bc8f-83e3-4f2a-95af-aaf8a4454271",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            51.28107075,
-            51.78964824
-          ],
-          [
-            86.04206501,
-            61.88134547
-          ],
-          [
-            95.67877629,
-            42.45694153
-          ],
-          [
-            64.35946463,
-            29.11795964
-          ]
-        ]
-      },
-      "properties": {
-        "name": "route"
-      }
-    }
-  ]
-}
-      L.geoJson(myGeoJSON).addTo(map);
+     var query = { "collection": "FeatureCollection"}
+     $.ajax({
+         type: "post",
+         data: JSON.stringify(query),
+         contentType: "application/json",
+         dataType: "json",
+         url: "/api/find_mongo_collection",
+         success: function (data) {
+             L.geoJson(data).addTo(map);
+         },
+         error: function () {
+             console.log("error occurred");
+         }
+          })
 </script>
 </body>
 </html>
