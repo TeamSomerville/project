@@ -622,6 +622,9 @@ def save_trip():
     tripid = dataset[0][0]
     add_user_trip(data["userid"], tripid)
 
+    #create geojson
+    
+
     datadict = {}
     datadict["ReturnCode"] = 200
     json_data = json.dumps(datadict)
