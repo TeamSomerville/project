@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request
 from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
 from app.forms import UpdateRatingForm, SaveTripForm
-from app.nosql import getCollection
+from app.nosql import getCollection, saveDocument
 import json
 import requests
 main = Blueprint('main', __name__)
@@ -226,6 +226,10 @@ def find_city_spotids():
     json_data = json.dumps(datadict)
     return json_data
 
+def find_spot_details_db(spotid):
+    query = "select spotname, cityname, address, suggesthours, cost, autismfriendly, openday, opennight, rating, introduction, lat, lng, imgurl, website, category, state from public.find_spot_details({})".format(spotid)
+    return onnect(query)
+
 @main.route("/api/find_spot_details", methods=["POST"])
 def find_spot_details():
     """ 
@@ -255,8 +259,7 @@ def find_spot_details():
     }
     """
     data  = request.json or {}
-    query = "select spotname, cityname, address, suggesthours, cost, autismfriendly, openday, opennight, rating, introduction, lat, lng, imgurl, website, category, state from public.find_spot_details({})".format(data["spotid"])
-    dataset= connect(query)
+    dataset = find_spot_details_db(data["spotid"])
     datadict = {}
     datadict["spotid"] = data["spotid"]
     datadict["spotname"] = dataset[0][0]
@@ -622,8 +625,23 @@ def save_trip():
     tripid = dataset[0][0]
     add_user_trip(data["userid"], tripid)
 
+    #fetch the spots of the suggested routes
+    spots = []
+    for spotid in data["suggestroutine"]:
+        spot = find_spot_details_db(spotid)
+        spots.append(spot)
+
     #create geojson
-    
+    geoDocument = {}
+    geoDocument["type"] = "FeatureCollection"
+    geoDocument["userid"] = data["userid"]
+    geoDocument["features"] = [dict(type="Feature",
+                                    geometry=dict(type="LineString",
+                                                  coordinates=[[x["lat"],x["lng"]] for x in spots]),
+                                    properties=dict(name="route")
+                                    )] 
+    #save the geojson in mongo
+    saveDocument(geoDocument)
 
     datadict = {}
     datadict["ReturnCode"] = 200
