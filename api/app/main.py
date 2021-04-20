@@ -83,12 +83,14 @@ def ui_save_trip():
 	      "toflightid": 96,
 	      "backflightid": 96,
 	      "suggestdays": 96,
-	      "suggestroutine": [96, 23, 34]
+	      "suggestroutine": [96, 97, 98]
 	    }
-       response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
+       #response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
+       response = requests.post("http://localhost:5000/api/save_trip", json=query)
 
     query = {"userid": 11}
-    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    #response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    response = requests.post("http://localhost:5000/api/find_saved_trips", json=query)
     data = json.loads(response.text)
     items = []
     for trip in data["trips"]:
@@ -175,11 +177,13 @@ def find_mongo_collection():
     }
     """
     data  = request.json or {}
-    dataset= getCollection(data["collection"])
+    dataset= getCollection(collection=data["collection"], user=11)
     datadict = {}
     datadict["type"] = "FeatureCollection"
-    datadict["features"] = [x for x in dataset]
+    datadict["features"] = [dataset[0]]
     json_data = json.dumps(datadict)
+    print ("printing returned geojson data...")
+    print (json_data)
     return json_data
 
 @main.route("/api/find_city_by_name", methods=["POST"])
@@ -228,7 +232,7 @@ def find_city_spotids():
 
 def find_spot_details_db(spotid):
     query = "select spotname, cityname, address, suggesthours, cost, autismfriendly, openday, opennight, rating, introduction, lat, lng, imgurl, website, category, state from public.find_spot_details({})".format(spotid)
-    return onnect(query)
+    return connect(query)
 
 @main.route("/api/find_spot_details", methods=["POST"])
 def find_spot_details():
@@ -629,17 +633,15 @@ def save_trip():
     spots = []
     for spotid in data["suggestroutine"]:
         spot = find_spot_details_db(spotid)
-        spots.append(spot)
+        spots.append(dict(lat=spot[0][10], lng=spot[0][11]))
 
     #create geojson
-    geoDocument = {}
-    geoDocument["type"] = "FeatureCollection"
-    geoDocument["userid"] = data["userid"]
-    geoDocument["features"] = [dict(type="Feature",
-                                    geometry=dict(type="LineString",
-                                                  coordinates=[[x["lat"],x["lng"]] for x in spots]),
-                                    properties=dict(name="route")
-                                    )] 
+    geoDocument = dict(type="Feature",
+                       userid=data["userid"],
+                       geometry=dict(type="LineString",
+                                     coordinates=[[x["lng"],x["lat"]] for x in spots]),
+                       properties=dict(name="route")
+                      ) 
     #save the geojson in mongo
     saveDocument(geoDocument)
 

@@ -34,7 +34,7 @@
          attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
      });
      tiles.addTo(map);
-     var query = { "collection": "FeatureCollection"}
+     var query = { "collection": "userroutes"}
      $.ajax({
          type: "post",
          data: JSON.stringify(query),
@@ -42,6 +42,7 @@
          dataType: "json",
          url: "/api/find_mongo_collection",
          success: function (data) {
+             console.log(data);
              L.geoJson(data).addTo(map);
          },
          error: function () {
