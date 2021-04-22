@@ -637,7 +637,7 @@ def save_trip():
         point = dict(type="Feature",
                      geometry=dict(type="Point",
                                    coordinates=[dic["lng"],dic["lat"]]),
-                     properties=dict(name=seq)
+                     properties=dict(name="{0}:{1}".format(seq, spot[0][0]))
                 )
         features.append(point)
 
