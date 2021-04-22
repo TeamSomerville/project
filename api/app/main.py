@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request
 from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
 from app.forms import UpdateRatingForm, SaveTripForm
-from app.nosql import getCollection
+from app.nosql import getCollection, saveDocument
 import json
 import requests
 main = Blueprint('main', __name__)
@@ -83,12 +83,14 @@ def ui_save_trip():
 	      "toflightid": 96,
 	      "backflightid": 96,
 	      "suggestdays": 96,
-	      "suggestroutine": [96, 23, 34]
+	      "suggestroutine": [96, 97, 98]
 	    }
-       response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
+       #response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
+       response = requests.post("http://localhost:5000/api/save_trip", json=query)
 
     query = {"userid": 11}
-    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    #response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    response = requests.post("http://localhost:5000/api/find_saved_trips", json=query)
     data = json.loads(response.text)
     items = []
     for trip in data["trips"]:
@@ -175,11 +177,8 @@ def find_mongo_collection():
     }
     """
     data  = request.json or {}
-    dataset= getCollection(data["collection"])
-    datadict = {}
-    datadict["type"] = "FeatureCollection"
-    datadict["features"] = [x for x in dataset]
-    json_data = json.dumps(datadict)
+    dataset= getCollection(collection=data["collection"], user=11)
+    json_data = json.dumps(dataset[0])
     return json_data
 
 @main.route("/api/find_city_by_name", methods=["POST"])
@@ -226,6 +225,10 @@ def find_city_spotids():
     json_data = json.dumps(datadict)
     return json_data
 
+def find_spot_details_db(spotid):
+    query = "select spotname, cityname, address, suggesthours, cost, autismfriendly, openday, opennight, rating, introduction, lat, lng, imgurl, website, category, state from public.find_spot_details({})".format(spotid)
+    return connect(query)
+
 @main.route("/api/find_spot_details", methods=["POST"])
 def find_spot_details():
     """ 
@@ -255,8 +258,7 @@ def find_spot_details():
     }
     """
     data  = request.json or {}
-    query = "select spotname, cityname, address, suggesthours, cost, autismfriendly, openday, opennight, rating, introduction, lat, lng, imgurl, website, category, state from public.find_spot_details({})".format(data["spotid"])
-    dataset= connect(query)
+    dataset = find_spot_details_db(data["spotid"])
     datadict = {}
     datadict["spotid"] = data["spotid"]
     datadict["spotname"] = dataset[0][0]
@@ -621,6 +623,39 @@ def save_trip():
     #calling add_usertrip
     tripid = dataset[0][0]
     add_user_trip(data["userid"], tripid)
+
+    #fetch the spots of the suggested routes
+    spots = []
+    features = []
+    seq = 0
+    for spotid in data["suggestroutine"]:
+        seq += 1
+        spot = find_spot_details_db(spotid)
+        dic = dict(lat=spot[0][10], lng=spot[0][11])
+        spots.append(dic)
+        #create spot geojson
+        point = dict(type="Feature",
+                     geometry=dict(type="Point",
+                                   coordinates=[dic["lng"],dic["lat"]]),
+                     properties=dict(name="{0}:{1}".format(seq, spot[0][0]))
+                )
+        features.append(point)
+
+    #create geojson line
+    line = dict(type="Feature",
+                       geometry=dict(type="LineString",
+                                     coordinates=[[x["lng"],x["lat"]] for x in spots]),
+                       properties=dict(name="route")
+                      ) 
+    features.append(line) 
+
+    geoDoc = dict(type="FeatureCollection",
+                  userid=data["userid"],
+                  tripid=tripid,
+                  features=features)
+                  
+    #save the geojson in mongo
+    saveDocument(geoDoc)
 
     datadict = {}
     datadict["ReturnCode"] = 200

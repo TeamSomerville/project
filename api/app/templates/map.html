@@ -3,16 +3,13 @@
 
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="   crossorigin=""/>
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <!--this is new-->
 
-    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-    <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.js'></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
 
     <style type="text/css">
     #map {
@@ -29,12 +26,7 @@
 <body>
 <div id="map"> </div>
 <script type="text/javascript">
-     var map = L.map("map").setView([45.18766302,77.43785851], 4);
-     var tiles = L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=4f3hBKrjDqQGPICv8MkY", {
-         attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
-     });
-     tiles.addTo(map);
-     var query = { "collection": "FeatureCollection"}
+     var query = { "collection": "userroutes"}
      $.ajax({
          type: "post",
          data: JSON.stringify(query),
@@ -42,7 +34,21 @@
          dataType: "json",
          url: "/api/find_mongo_collection",
          success: function (data) {
-             L.geoJson(data).addTo(map);
+             console.log(data);
+             var home = [data.features[0].geometry.coordinates[1],data.features[0].geometry.coordinates[0]]; 
+             var map = L.map('map').setView(home, 12);
+	     var tiles = L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=4f3hBKrjDqQGPICv8MkY", {
+		 attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
+	     });
+	     tiles.addTo(map);
+             var pointLayer = L.geoJson(null, {
+             				 pointToLayer: function(feature, latlng){
+             				     label = String(feature.properties.name);
+                                             return new L.CircleMarker(latlng).bindTooltip(label, {permanent: true, opacity: 1}).openTooltip(); 
+             				 }
+             			     });
+             pointLayer.addData(data);
+             map.addLayer(pointLayer);
          },
          error: function () {
              console.log("error occurred");
