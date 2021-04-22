@@ -85,12 +85,12 @@ def ui_save_trip():
 	      "suggestdays": 96,
 	      "suggestroutine": [96, 97, 98]
 	    }
-       #response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
-       response = requests.post("http://localhost:5000/api/save_trip", json=query)
+       response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
+       #response = requests.post("http://localhost:5000/api/save_trip", json=query)
 
     query = {"userid": 11}
-    #response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
-    response = requests.post("http://localhost:5000/api/find_saved_trips", json=query)
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    #response = requests.post("http://localhost:5000/api/find_saved_trips", json=query)
     data = json.loads(response.text)
     items = []
     for trip in data["trips"]:
