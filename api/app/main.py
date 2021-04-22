@@ -178,12 +178,7 @@ def find_mongo_collection():
     """
     data  = request.json or {}
     dataset= getCollection(collection=data["collection"], user=11)
-    datadict = {}
-    datadict["type"] = "FeatureCollection"
-    datadict["features"] = [dataset[0]]
-    json_data = json.dumps(datadict)
-    print ("printing returned geojson data...")
-    print (json_data)
+    json_data = json.dumps(dataset[0])
     return json_data
 
 @main.route("/api/find_city_by_name", methods=["POST"])
@@ -631,19 +626,36 @@ def save_trip():
 
     #fetch the spots of the suggested routes
     spots = []
+    features = []
+    seq = 0
     for spotid in data["suggestroutine"]:
+        seq += 1
         spot = find_spot_details_db(spotid)
-        spots.append(dict(lat=spot[0][10], lng=spot[0][11]))
+        dic = dict(lat=spot[0][10], lng=spot[0][11])
+        spots.append(dic)
+        #create spot geojson
+        point = dict(type="Feature",
+                     geometry=dict(type="Point",
+                                   coordinates=[dic["lng"],dic["lat"]]),
+                     properties=dict(name=seq)
+                )
+        features.append(point)
 
-    #create geojson
-    geoDocument = dict(type="Feature",
-                       userid=data["userid"],
+    #create geojson line
+    line = dict(type="Feature",
                        geometry=dict(type="LineString",
                                      coordinates=[[x["lng"],x["lat"]] for x in spots]),
                        properties=dict(name="route")
                       ) 
+    features.append(line) 
+
+    geoDoc = dict(type="FeatureCollection",
+                  userid=data["userid"],
+                  tripid=tripid,
+                  features=features)
+                  
     #save the geojson in mongo
-    saveDocument(geoDocument)
+    saveDocument(geoDoc)
 
     datadict = {}
     datadict["ReturnCode"] = 200

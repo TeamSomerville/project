@@ -7,7 +7,7 @@ def getCollection(collection, user):
    
    col = db[collection]
    
-   x = col.find({"userid":user}, {"_id": 0, "userid":0})
+   x = col.find({"userid":user}, {"_id": 0, "userid":0, "tripid":0})
    
    return x
 
