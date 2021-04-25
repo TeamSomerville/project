@@ -58,7 +58,7 @@ def call_fn(fn, params):
            else:
              raise ValueError("param datatype not specified")
 
-        query = "select {0}({1});".format(fn, ",".join(converted))
+        query = "select * from {0}({1});".format(fn, ",".join(converted))
         print (query)
         cur.execute(query)
         conn.commit()
