@@ -12,19 +12,54 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
     <style type="text/css">
-    #map {
-        position: absolute; top: 0; bottom: 0; left: 0; right: 0;}
-    }
-    /* This is new */
-    
-    button {
-        width: 100px;
-    }
+    #map { height: 500px;  position:inherited; }
     </style>
+
+    <script type="text/javascript">
+     var query = { "userid": 11}
+     $.ajax({
+         type: "post",
+         data: JSON.stringify(query),
+         contentType: "application/json",
+         dataType: "json",
+         url: "/api/find_saved_trips",
+         success: function (data) {
+		//Populate dropdown
+		
+         },
+         error: function () {
+             console.log("error occurred");
+         }
+          })
+	
+    </script>
 </head>
 
 <body>
-<div id="map"> </div>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-6">
+			<h1>Sample Map Title</h1>
+               </div>
+	</div>
+	<div class="row">
+		<div class="col-md-6" id="map"></div>
+	</div>
+        <div class="row">
+		<div class="col-md-6">
+			<div class="dropdown">
+				  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    Dropdown button
+				  </button>
+				  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+				    <a class="dropdown-item" href="#">Action</a>
+				    <a class="dropdown-item" href="#">Another action</a>
+				    <a class="dropdown-item" href="#">Something else here</a>
+				  </div>
+			</div>
+		</div>
+        </div>
+</div>
 <script type="text/javascript">
      var query = { "collection": "userroutes"}
      $.ajax({
@@ -36,7 +71,7 @@
          success: function (data) {
              console.log(data);
              var home = [data.features[0].geometry.coordinates[1],data.features[0].geometry.coordinates[0]]; 
-             var map = L.map('map').setView(home, 12);
+             var map = L.map('map').setView(home, 11);
 	     var tiles = L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=4f3hBKrjDqQGPICv8MkY", {
 		 attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
 	     });
@@ -55,5 +90,8 @@
          }
           })
 </script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>
