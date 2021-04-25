@@ -225,6 +225,68 @@ def find_city_spotids():
     json_data = json.dumps(datadict)
     return json_data
 
+@main.route("/api/find_many_spot_details", methods=["POST"])
+def find_many_spot_details():
+    """ 
+    Input Json Example
+    {
+      "spotids": [96,97,98]
+      "userid": 11
+    }
+    Return Json Example
+    {
+        [
+			{
+				"spotid": "96",
+				"spotname": "Pearl Harbor Aviation Museum",
+				"cityname": "Honolulu, HI",
+				"address": "319 Lexington Blvd, Honolulu, HI 96818",
+				"suggesthours": 8,
+				"cost": 25,
+				"autismfriendly": false,
+				"openday": true,
+				"opennight": false,
+				"rating": 4.604,
+				"introduction": "ctly to the attack on Pearl Harbor and World War II.",
+				"lat": 21.359744,
+				"lng": -157.961823,
+				"imgurl": "https://lh5.googleusercontent.com/p/AF1QipOye_AyHpDXGHbe2nJo3nLeoRNlOI0iagq2sg3X=w1920-h1080-k-no",
+				"website": "pearlharboraviationmuseum.org",
+				"category": "Museum",
+				"state": " HI"
+			},
+	]
+    }
+    """
+    data  = request.json or {}
+    params = []
+    params.append((data["spotids"], "array"))
+    fn = "find_many_spot_details"
+    dataset = call_fn(fn, params)
+
+    ls = []
+    for item in dataset:
+       datadict = {}
+       datadict["spotname"] = item[0]
+       datadict["cityname"] = item[1]
+       datadict["address"] = item[2]
+       datadict["suggesthours"] = item[3]
+       datadict["cost"] = item[4]
+       datadict["autismfriendly"] = item[5]
+       datadict["openday"] = item[6]
+       datadict["opennight"] = item[7]
+       datadict["rating"] = item[8]
+       datadict["introduction"] = item[9]
+       datadict["lat"] = item[10]
+       datadict["lng"] = item[11]
+       datadict["imgurl"] = item[12]
+       datadict["website"] = item[13]
+       datadict["category"] = item[14]
+       datadict["state"] = item[15]
+       ls.append(datadict)
+    json_data = json.dumps(ls)
+    return json_data
+
 def find_spot_details_db(spotid):
     query = "select spotname, cityname, address, suggesthours, cost, autismfriendly, openday, opennight, rating, introduction, lat, lng, imgurl, website, category, state from public.find_spot_details({})".format(spotid)
     return connect(query)
