@@ -18,6 +18,36 @@ def deleteusertrip(tripid):
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/delete_usertrip", json=query)
     return profile()
 
+@main.route("/front_adduser", methods=["POST"])
+def front_adduser():
+    email = request.form["email"]
+    username = request.form['username']
+    password = request.form['password']
+    query = {'username':username,
+         'password':password,
+         'createon':'2016-06-22 19:10:25-07',
+         'gender':'male',
+         'familyname':'dog',
+         'givenname':'cat',
+         'birthday':'1999-10-10',
+         'homecityid':'40',
+         'email':email
+        }
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/add_new_user",json=query)
+    return render_template("login.html")
+
+@main.route("/front_login", methods=["POST"])
+def login():
+    email = request.form["email"]
+    username = request.form['username']
+    password = request.form['password']
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_user_id",json=query)
+    data = json.loads(response.text)
+    if data['userid']==None:
+        return render_template("login.html")
+    data['username'] = username
+    return render_template("destination.html")
+
 @main.route("/profile")
 def profile():
     userid_ = 11
@@ -66,11 +96,9 @@ def ui_save_trip():
 	      "suggestroutine": [96, 97, 98]
 	    }
        response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/save_trip", json=query)
-       #response = requests.post("http://localhost:5000/api/save_trip", json=query)
 
     query = {"userid": 11}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
-    #response = requests.post("http://localhost:5000/api/find_saved_trips", json=query)
     data = json.loads(response.text)
     items = []
     for trip in data["trips"]:
