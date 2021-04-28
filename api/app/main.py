@@ -154,6 +154,10 @@ def find_mongo_collection():
     Input Json Example
     {
       "collection": "FeatureCollection",
+      "filter": {
+		  "userid": 11,
+		  "tripid": 33
+		}
     }
     Return Json Example
     {
@@ -177,7 +181,8 @@ def find_mongo_collection():
     }
     """
     data  = request.json or {}
-    dataset= getCollection(collection=data["collection"], user=11)
+    print (data["filter"])
+    dataset= getCollection(collection=data["collection"], queryFilter=data["filter"])
     json_data = json.dumps(dataset[0])
     return json_data
 

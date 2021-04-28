@@ -1,13 +1,13 @@
 import pymongo
 
-def getCollection(collection, user):
+def getCollection(collection, queryFilter):
    client = pymongo.MongoClient("mongodb://localhost:27017/")
    
    db = client["geo"]
    
    col = db[collection]
    
-   x = col.find({"userid":user}, {"_id": 0, "userid":0, "tripid":0})
+   x = col.find(queryFilter, {"_id": 0, "userid":0, "tripid":0})
    
    return x
 
