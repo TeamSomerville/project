@@ -12,48 +12,110 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
     <style type="text/css">
-    #map {
-        position: absolute; top: 0; bottom: 0; left: 0; right: 0;}
-    }
-    /* This is new */
-    
-    button {
-        width: 100px;
-    }
+        #map { height: 500px;  position:inherited; }
+	.dropdown {
+	  position: relative;
+	  display: inline-block;
+	}
     </style>
+
 </head>
 
 <body>
-<div id="map"> </div>
+    <script type="text/javascript">
+     $(function () {
+	$("#jsdropdown").change(function () {
+		var selectedText = $("#trips").find("option:selected").text();
+		var selectedValue = $("#trips").val();
+                console.log("Selected Value " + selectedValue);
+      		getMapData(11, selectedValue);
+	});
+     });
+     $(document).ready(function(){
+	     var query = { "userid": 11}
+	     $.ajax({
+		 type: "post",
+		 data: JSON.stringify(query),
+		 contentType: "application/json",
+		 dataType: "json",
+		 url: "/api/find_saved_trips",
+		 success: function (data) {
+			//Populate dropdown
+			var trips = data["trips"]
+			var select = document.createElement("select");
+			select.name = "trips";
+			select.id = "trips";
+			$.each(trips, function(x, y){
+				//console.log(x);
+			        //dropdown.append($('<a href="#"></a>').attr('value', y["tripid"]).text(y["tripid"]));
+				var option = document.createElement("option");
+				option.value = y["tripid"];
+				option.text = y["tripid"];
+				select.appendChild(option);
+			});
+			document.getElementById("jsdropdown").appendChild(select);
+		 },
+		 error: function () {
+		     console.log("error occurred");
+		 }
+		  });
+    });
+	
+    </script>
+<div class="container">
+	<div class="row">
+		<div class="col-md-6">
+			<h1>Sample Map Title</h1>
+               </div>
+	</div>
+	<div class="row" id="mapbox">
+		<div class="col-md-6" id="map"></div>
+	</div>
+	<div class="dropdown">
+          <div id="jsdropdown">
+          </div>
+       </div>
+          
+</div>
 <script type="text/javascript">
-     var query = { "collection": "userroutes"}
-     $.ajax({
-         type: "post",
-         data: JSON.stringify(query),
-         contentType: "application/json",
-         dataType: "json",
-         url: "/api/find_mongo_collection",
-         success: function (data) {
-             console.log(data);
-             var home = [data.features[0].geometry.coordinates[1],data.features[0].geometry.coordinates[0]]; 
-             var map = L.map('map').setView(home, 12);
-	     var tiles = L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=4f3hBKrjDqQGPICv8MkY", {
-		 attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
-	     });
-	     tiles.addTo(map);
-             var pointLayer = L.geoJson(null, {
-             				 pointToLayer: function(feature, latlng){
-             				     label = String(feature.properties.name);
-                                             return new L.CircleMarker(latlng).bindTooltip(label, {permanent: true, opacity: 1}).openTooltip(); 
-             				 }
-             			     });
-             pointLayer.addData(data);
-             map.addLayer(pointLayer);
-         },
-         error: function () {
-             console.log("error occurred");
-         }
-          })
+     function getMapData(userid, tripid){
+	     var query = { "collection": "userroutes", "filter": {"userid":userid, "tripid":parseInt(tripid)} }
+             console.log("userid " +userid + " and tripid " + tripid);
+	     $.ajax({
+		 type: "post",
+		 data: JSON.stringify(query),
+		 contentType: "application/json",
+		 dataType: "json",
+		 url: "/api/find_mongo_collection",
+		 success: function (data) {
+		     console.log(data);
+		     var home = [data.features[0].geometry.coordinates[1],data.features[0].geometry.coordinates[0]]; 
+		     $("#mapbox").html("");
+		     $("#mapbox").html('<div class="col-md-6" id="map"></div>');
+		     var mapInstance = L.map('map').setView(home, 11);
+		     var tiles = L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=4f3hBKrjDqQGPICv8MkY", {
+			 attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
+		     });
+		     tiles.addTo(mapInstance);
+		     var pointLayer = L.geoJson(null, {
+						 pointToLayer: function(feature, latlng){
+						     label = String(feature.properties.name);
+						     return new L.CircleMarker(latlng).bindTooltip(label, {permanent: true, opacity: 1}).openTooltip(); 
+						 }
+					     });
+		     pointLayer.addData(data);
+		     mapInstance.addLayer(pointLayer);
+		 },
+		 error: function () {
+		     console.log("error occurred");
+		 }
+		  })
+      };
+      getMapData(11, 33);
+      
 </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>
