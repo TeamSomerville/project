@@ -520,6 +520,7 @@ def find_destinations():
     Return Json Example
     {"cities": ["New York", "Boston"]}
     """
+    print ("find destinations starting...")
     query = "select names from find_destinations()"
     dataset= connect(query)
     datadict = {}
