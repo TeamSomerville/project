@@ -54,6 +54,140 @@
 			  })	
 		});
 
+		function getSpotDetails(spotids){
+			console.log("spotids are " + spotids);
+			query = {"spotids": spotids, "userid": 11}
+			$.ajax({
+			 type: "post",
+			 data: JSON.stringify(query),
+			 contentType: "application/json",
+			 dataType: "json",
+			 url: "/api/find_many_spot_details",
+			 success: function (data) {
+				//display each spot in a grid
+				//console.log("spot is " + data[0]["spotname"]);
+				var table = document.createElement("table");
+				table.class = "table table-bordered";
+				var thead = document.createElement("thead");
+				var tr = document.createElement("tr");
+				var spotnameHeaderCol = document.createElement("th");
+				spotnameHeaderCol .scope = "col";
+				spotnameHeaderCol.innerHTML = "SpotName";
+				tr.appendChild(spotnameHeaderCol);
+				var citynameHeaderCol = document.createElement("th");
+				citynameHeaderCol.scope = "col";
+				citynameHeaderCol.innerHTML = "CityName";
+				tr.appendChild(citynameHeaderCol);
+				var addressHeaderCol = document.createElement("th");
+				addressHeaderCol.scope = "col";
+				addressHeaderCol.innerHTML = "Address";
+				tr.appendChild(addressHeaderCol);
+				var suggesthoursHeaderCol = document.createElement("th");
+				suggesthoursHeaderCol.scope = "col";
+				suggesthoursHeaderCol.innerHTML = "SuggestHours";
+				tr.appendChild(suggesthoursHeaderCol);
+				var costHeaderCol = document.createElement("th");
+				costHeaderCol.scope = "col";
+				costHeaderCol.innerHTML = "Cost";
+				tr.appendChild(costHeaderCol);
+				var autismHeaderCol = document.createElement("th");
+				autismHeaderCol.scope = "col";
+				autismHeaderCol.innerHTML = "AutismFriendly";
+				tr.appendChild(autismHeaderCol);
+				var opendayHeaderCol = document.createElement("th");
+				opendayHeaderCol.scope = "col";
+				opendayHeaderCol.innerHTML = "OpenDay";
+				tr.appendChild(opendayHeaderCol);
+				var opennightHeaderCol = document.createElement("th");
+				opennightHeaderCol.scope = "col";
+				opennightHeaderCol.innerHTML = "OpenNight";
+				tr.appendChild(opennightHeaderCol);
+				var ratingHeaderCol = document.createElement("th");
+				ratingHeaderCol.scope = "col";
+				ratingHeaderCol.innerHTML = "Rating";
+				tr.appendChild(ratingHeaderCol);
+				var introHeaderCol = document.createElement("th");
+				introHeaderCol.scope = "col";
+				introHeaderCol.innerHTML = "Introduction";
+				tr.appendChild(introHeaderCol);
+				var imgurlHeaderCol = document.createElement("th");
+				imgurlHeaderCol.scope = "col";
+				imgurlHeaderCol.innerHTML = "Img";
+				tr.appendChild(imgurlHeaderCol);
+				var websiteHeaderCol = document.createElement("th");
+				websiteHeaderCol.scope = "col";
+				websiteHeaderCol.innerHTML = "Website";
+				tr.appendChild(websiteHeaderCol);
+				var categoryHeaderCol = document.createElement("th");
+				categoryHeaderCol.scope = "col";
+				categoryHeaderCol.innerHTML = "Category";
+				tr.appendChild(categoryHeaderCol);
+				var stateHeaderCol = document.createElement("th");
+				stateHeaderCol.scope = "col";
+				stateHeaderCol.innerHTML = "State";
+				tr.appendChild(stateHeaderCol);
+				thead.appendChild(tr);
+				table.appendChild(thead);
+				var tbody = document.createElement("tbody");
+				data.forEach(function(spot) {
+					var tr = document.createElement("tr");
+					var spotname = document.createElement("td");
+					spotname.innerHTML = spot["spotname"];
+					tr.appendChild(spotname);
+					var cityname = document.createElement("td");
+					cityname.innerHTML = spot["cityname"];
+					tr.appendChild(cityname);
+					var address = document.createElement("td");
+					address.innerHTML = spot["address"];
+					tr.appendChild(address);
+					var suggesthours = document.createElement("td");
+					suggesthours.innerHTML = spot["suggesthours"];
+					tr.appendChild(suggesthours);
+					var cost = document.createElement("td");
+					cost.innerHTML = spot["cost"];
+					tr.appendChild(cost);
+					var autism = document.createElement("td");
+					autism.innerHTML = spot["autismfriendly"];
+					tr.appendChild(autism);
+					var openday = document.createElement("td");
+					openday.innerHTML = spot["openday"];
+					tr.appendChild(openday);
+					var opennight = document.createElement("td");
+					opennight.innerHTML = spot["opennight"];
+					tr.appendChild(opennight);
+					var rating = document.createElement("td");
+					rating.innerHTML = spot["rating"];
+					tr.appendChild(rating);
+					var intro = document.createElement("td");
+					intro.innerHTML = spot["introduction"];
+					tr.appendChild(intro);
+					var imgurl = document.createElement("td");
+					var img = document.createElement("img");
+					img.src = spot["imgurl"];
+					img.class = "img-fluid";
+					img.alt = "responsive image";
+					imgurl.appendChild(img);
+					tr.appendChild(imgurl);
+					var website = document.createElement("td");
+					website.innerHTML = spot["website"];
+					tr.appendChild(website);
+					var category = document.createElement("td");
+					category.innerHTML = spot["category"];
+					tr.appendChild(category);
+					var state = document.createElement("td");
+					state.innerHTML = spot["state"];
+					tr.appendChild(state);
+					tbody.appendChild(tr);
+				});
+				table.appendChild(tbody);
+				document.getElementById("table").appendChild(table);
+			 },
+			 error: function () {
+			     console.log("error occurred");
+			 }
+			  })	
+		};
+
 		function getSpotsForCity(city){
 			console.log("city is " + city);
 			query = {"city": city}
@@ -65,36 +199,7 @@
 			 url: "/api/find_city_spotids",
 			 success: function (data) {
 				console.log("spotids " + data["spotids"]);
-				//display each spot in a grid
-				var table = document.createElement("table");
-				table.class = "table";
-				var thead = document.createElement("thead");
-				var tr = document.createElement("tr");
-				var firstHeaderCol = document.createElement("th");
-				firstHeaderCol.scope = "col";
-				firstHeaderCol.innerHTML = "First";
-				var secondHeaderCol = document.createElement("th");
-				secondHeaderCol.scope = "col";
-				secondHeaderCol.innerHTML = "Second";
-				tr.appendChild(firstHeaderCol);
-				tr.appendChild(secondHeaderCol);
-				thead.appendChild(tr);
-				table.appendChild(thead);
-				var tbody = document.createElement("tbody");
-				var spotids = data["spotids"];
-				$.each(spotids, function(x) {
-					console.log("x is " + x);
-					var tr = document.createElement("tr");
-					var first = document.createElement("td");
-					first.innerHTML = x;
-					//var second = document.createElement("td");
-					//second.innerHTML = spot[1];
-					tr.appendChild(first);
-					//tr.appendChild(second);
-					tbody.appendChild(tr);
-				});
-				table.appendChild(tbody);
-				document.getElementById("table").appendChild(table);
+				getSpotDetails(data["spotids"]);
 			 },
 			 error: function () {
 			     console.log("error occurred");
@@ -113,7 +218,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="row" id="table">
+		<div class="row table-responsive" id="table">
 		</div>
 	</div> 
 
