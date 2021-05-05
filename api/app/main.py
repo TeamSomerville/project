@@ -40,31 +40,7 @@ def profile():
 
 @main.route('/update_rating', methods=["POST", "GET"])
 def ui_update_rating():
-    form = UpdateRatingForm()
-    if form.validate_on_submit():
-       query = {"spotid": "96", "rating": form.rating.data}
-       response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/update_rating", json=query)
-
-    query = {"spotid":96}
-    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
-    data = json.loads(response.text)
-    items = [dict(spotid=data["spotid"],
-	     spotname=data["spotname"],
-	     cityname=data["cityname"],
-	     address=data["address"],
-	     rating=data["rating"])]
-    # Declare your table
-    class SubTable(Table):
-       border = "Yes"
-       spotid = Col("Spot ID")
-       spotname = Col("Spot Name")
-       cityname = Col("City Name")
-       address = Col("Address")
-       rating = Col("Rating")
-           
-       # Populate the table
-    table = SubTable(items)
-    return render_template("update.html", form=form, table=table)
+    return render_template("update.html")
 
 @main.route('/save_trip', methods=["POST", "GET"])
 def ui_save_trip():
@@ -272,22 +248,23 @@ def find_many_spot_details():
     ls = []
     for item in dataset:
        datadict = {}
-       datadict["spotname"] = item[0]
-       datadict["cityname"] = item[1]
-       datadict["address"] = item[2]
-       datadict["suggesthours"] = item[3]
-       datadict["cost"] = item[4]
-       datadict["autismfriendly"] = item[5]
-       datadict["openday"] = item[6]
-       datadict["opennight"] = item[7]
-       datadict["rating"] = item[8]
-       datadict["introduction"] = item[9]
-       datadict["lat"] = item[10]
-       datadict["lng"] = item[11]
-       datadict["imgurl"] = item[12]
-       datadict["website"] = item[13]
-       datadict["category"] = item[14]
-       datadict["state"] = item[15]
+       datadict["spotid"] = item[0]
+       datadict["spotname"] = item[1]
+       datadict["cityname"] = item[2]
+       datadict["address"] = item[3]
+       datadict["suggesthours"] = item[4]
+       datadict["cost"] = item[5]
+       datadict["autismfriendly"] = item[6]
+       datadict["openday"] = item[7]
+       datadict["opennight"] = item[8]
+       datadict["rating"] = item[9]
+       datadict["introduction"] = item[10]
+       datadict["lat"] = item[11]
+       datadict["lng"] = item[12]
+       datadict["imgurl"] = item[13]
+       datadict["website"] = item[14]
+       datadict["category"] = item[15]
+       datadict["state"] = item[16]
        ls.append(datadict)
     json_data = json.dumps(ls)
     return json_data

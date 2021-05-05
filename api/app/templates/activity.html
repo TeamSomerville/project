@@ -70,6 +70,9 @@
 				table.class = "table table-bordered";
 				var thead = document.createElement("thead");
 				var tr = document.createElement("tr");
+				var imgurlHeaderCol = document.createElement("th");
+				imgurlHeaderCol.scope = "col";
+				tr.appendChild(imgurlHeaderCol);
 				var spotnameHeaderCol = document.createElement("th");
 				spotnameHeaderCol .scope = "col";
 				spotnameHeaderCol.innerHTML = "SpotName";
@@ -110,10 +113,6 @@
 				introHeaderCol.scope = "col";
 				introHeaderCol.innerHTML = "Introduction";
 				tr.appendChild(introHeaderCol);
-				var imgurlHeaderCol = document.createElement("th");
-				imgurlHeaderCol.scope = "col";
-				imgurlHeaderCol.innerHTML = "Img";
-				tr.appendChild(imgurlHeaderCol);
 				var websiteHeaderCol = document.createElement("th");
 				websiteHeaderCol.scope = "col";
 				websiteHeaderCol.innerHTML = "Website";
@@ -131,6 +130,11 @@
 				var tbody = document.createElement("tbody");
 				data.forEach(function(spot) {
 					var tr = document.createElement("tr");
+					var imgurl = document.createElement("td");
+					var img = document.createElement("iframe");
+					img.src = spot["imgurl"];
+					imgurl.appendChild(img);
+					tr.appendChild(imgurl);
 					var spotname = document.createElement("td");
 					spotname.innerHTML = spot["spotname"];
 					tr.appendChild(spotname);
@@ -161,13 +165,6 @@
 					var intro = document.createElement("td");
 					intro.innerHTML = spot["introduction"];
 					tr.appendChild(intro);
-					var imgurl = document.createElement("td");
-					var img = document.createElement("img");
-					img.src = spot["imgurl"];
-					img.class = "img-fluid";
-					img.alt = "responsive image";
-					imgurl.appendChild(img);
-					tr.appendChild(imgurl);
 					var website = document.createElement("td");
 					website.innerHTML = spot["website"];
 					tr.appendChild(website);
