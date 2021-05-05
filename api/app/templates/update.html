@@ -15,29 +15,10 @@
 		var trips;
 
 
-		function editRating(event){
-			var spotid =  event.target.id;
-			var rating = event.data;
-			if ( rating != null)
-			{
-				//update the rating
-				query = {"spotid": spotid, "rating": rating}
-				$.ajax({
-				 type: "post",
-				 data: JSON.stringify(query),
-				 contentType: "application/json",
-				 dataType: "json",
-				 url: "/api/update_rating",
-				 success: function (data) {
-					console.log(data);
-					//populate the dropdown with the returned trips
-
-				 },
-				 error: function () {
-				     console.log("error occurred");
-				 }
-				  })	
-			}
+		function checkbox_clicked(event){
+			var checkid = event.target.id;
+			var spotid = checkid.substring(3);
+			console.log("spotid from checkbox is " + spotid);
 		};
 
 		
@@ -59,6 +40,9 @@
 				table.id = "my-table";
 				var thead = document.createElement("thead");
 				var tr = document.createElement("tr");
+				var check = document.createElement("th");
+				check.scope = "col";
+				tr.appendChild(check);
 				var imgurlHeaderCol = document.createElement("th");
 				imgurlHeaderCol.scope = "col";
 				tr.appendChild(imgurlHeaderCol);
@@ -74,18 +58,14 @@
 				addressHeaderCol.scope = "col";
 				addressHeaderCol.innerHTML = "Address";
 				tr.appendChild(addressHeaderCol);
-				var suggesthoursHeaderCol = document.createElement("th");
-				suggesthoursHeaderCol.scope = "col";
-				suggesthoursHeaderCol.innerHTML = "SuggestHours";
-				tr.appendChild(suggesthoursHeaderCol);
-				var costHeaderCol = document.createElement("th");
-				costHeaderCol.scope = "col";
-				costHeaderCol.innerHTML = "Cost";
-				tr.appendChild(costHeaderCol);
 				var ratingHeaderCol = document.createElement("th");
 				ratingHeaderCol.scope = "col";
 				ratingHeaderCol.innerHTML = "Rating";
 				tr.appendChild(ratingHeaderCol);
+				var newratingHeaderCol = document.createElement("th");
+				newratingHeaderCol.scope = "col";
+				newratingHeaderCol.innerHTML = "New Rating";
+				tr.appendChild(newratingHeaderCol);
 				var categoryHeaderCol = document.createElement("th");
 				categoryHeaderCol.scope = "col";
 				categoryHeaderCol.innerHTML = "Category";
@@ -99,6 +79,13 @@
 				var tbody = document.createElement("tbody");
 				data.forEach(function(spot) {
 					var tr = document.createElement("tr");
+					var checktd = document.createElement("td");
+					var inp = document.createElement("input");
+					inp.type = "checkbox";
+					inp.id = "inp" + spot["spotid"];
+					inp.addEventListener("click", checkbox_clicked);	
+					checktd.appendChild(inp);
+					tr.appendChild(checktd);
 					var imgurl = document.createElement("td");
 					var img = document.createElement("iframe");
 					img.src = spot["imgurl"];
@@ -113,19 +100,16 @@
 					var address = document.createElement("td");
 					address.innerHTML = spot["address"];
 					tr.appendChild(address);
-					var suggesthours = document.createElement("td");
-					suggesthours.innerHTML = spot["suggesthours"];
-					tr.appendChild(suggesthours);
-					var cost = document.createElement("td");
-					cost.innerHTML = spot["cost"];
-					tr.appendChild(cost);
 					var rating = document.createElement("td");
 					rating.id = spot["spotid"];
-					rating.contentEditable = 'true';
 					rating.innerHTML = spot["rating"];
-					//rating.setAttribute('oninput', 'alert("hello")');
-					rating.addEventListener("input", editRating);	
 					tr.appendChild(rating);
+					var newrating = document.createElement("td");
+					newrating.id = "new" + spot["spotid"];
+					newrating.setAttribute("class", "new");
+					newrating.contentEditable = 'true';
+					newrating.innerHTML = "";
+					tr.appendChild(newrating);
 					var category = document.createElement("td");
 					category.innerHTML = spot["category"];
 					tr.appendChild(category);
@@ -153,7 +137,42 @@
 			});
 		});
 
+		function updateRating(spotid, rating){
+			
+			query = {"spotid": spotid, "rating": rating}
+			$.ajax({
+			 type: "post",
+			 data: JSON.stringify(query),
+			 contentType: "application/json",
+			 dataType: "json",
+			 url: "/api/update_rating",
+			 success: function (data) {
+				console.log(data);
+				//populate the dropdown with the returned trips
+
+			 },
+			 error: function () {
+			     console.log("error occurred");
+			 }
+			  })	
+		};
 		$(document).ready(function(){
+			$('#mybutton').click(function (e) {
+				console.log("my button clicked");
+				//loop through the table
+				$('#my-table tbody tr').each( function(i) {
+					var chkbox = $(this).find('input[type="checkbox"]');
+					if (chkbox.prop("checked")){
+						var newrating = $(this).find('[class="new"]');
+						var spotid = chkbox.prop("id").substring(3);
+						var rating = newrating.text();
+						//update rating
+						updateRating(spotid, rating);
+						
+					}
+
+				});
+			});
 			//Populate the dropdown
 			query = {"userid": 11}
 			$.ajax({
@@ -196,6 +215,9 @@
 			<div class="col-md-6" id="dropdown">
 				<div id="jsdropdown">
 				</div>
+			</div>
+			<div class="col-md-6">
+				<button class="btn btn-primary" type="button" id="mybutton">Update Rating</button>
 			</div>
 		</div>
 		<div class="row table-responsive" id="table">
