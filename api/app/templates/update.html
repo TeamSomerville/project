@@ -13,6 +13,34 @@
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
 	<script type="text/javascript">
 		var trips;
+
+
+		function editRating(event){
+			var spotid =  event.target.id;
+			var rating = event.data;
+			if ( rating != null)
+			{
+				//update the rating
+				query = {"spotid": spotid, "rating": rating}
+				$.ajax({
+				 type: "post",
+				 data: JSON.stringify(query),
+				 contentType: "application/json",
+				 dataType: "json",
+				 url: "/api/update_rating",
+				 success: function (data) {
+					console.log(data);
+					//populate the dropdown with the returned trips
+
+				 },
+				 error: function () {
+				     console.log("error occurred");
+				 }
+				  })	
+			}
+		};
+
+		
 		function getSpotDetails(spotids){
 			console.log("spotids are " + spotids);
 			query = {"spotids": spotids, "userid": 11}
@@ -24,10 +52,11 @@
 			 url: "/api/find_many_spot_details",
 			 success: function (data) {
 				//display each spot in a grid
-				console.log("spot is " + data[0]["spotname"]);
+				console.log("spot is " + data[0]["spotid"]);
 				document.getElementById("table").innerHTML = "";
 				var table = document.createElement("table");
 				table.class = "table table-bordered";
+				table.id = "my-table";
 				var thead = document.createElement("thead");
 				var tr = document.createElement("tr");
 				var imgurlHeaderCol = document.createElement("th");
@@ -91,7 +120,11 @@
 					cost.innerHTML = spot["cost"];
 					tr.appendChild(cost);
 					var rating = document.createElement("td");
+					rating.id = spot["spotid"];
+					rating.contentEditable = 'true';
 					rating.innerHTML = spot["rating"];
+					//rating.setAttribute('oninput', 'alert("hello")');
+					rating.addEventListener("input", editRating);	
 					tr.appendChild(rating);
 					var category = document.createElement("td");
 					category.innerHTML = spot["category"];
