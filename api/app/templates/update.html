@@ -1,16 +1,183 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Update Rating</h1>
-<form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.rating.label }}<br>
-            {{ form.rating(size=32) }}
-        </p>
-        <p>{{ form.submit() }}</p>
-</form>
-<div class="column is-4 is-offset-4">
-    <h3 class="title">Spot Details</h3>
-    {{ table }}
-</div>
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
+	<script type="text/javascript">
+		var trips;
+		function getSpotDetails(spotids){
+			console.log("spotids are " + spotids);
+			query = {"spotids": spotids, "userid": 11}
+			$.ajax({
+			 type: "post",
+			 data: JSON.stringify(query),
+			 contentType: "application/json",
+			 dataType: "json",
+			 url: "/api/find_many_spot_details",
+			 success: function (data) {
+				//display each spot in a grid
+				console.log("spot is " + data[0]["spotname"]);
+				document.getElementById("table").innerHTML = "";
+				var table = document.createElement("table");
+				table.class = "table table-bordered";
+				var thead = document.createElement("thead");
+				var tr = document.createElement("tr");
+				var imgurlHeaderCol = document.createElement("th");
+				imgurlHeaderCol.scope = "col";
+				tr.appendChild(imgurlHeaderCol);
+				var spotnameHeaderCol = document.createElement("th");
+				spotnameHeaderCol.scope = "col";
+				spotnameHeaderCol.innerHTML = "SpotName";
+				tr.appendChild(spotnameHeaderCol);
+				var citynameHeaderCol = document.createElement("th");
+				citynameHeaderCol.scope = "col";
+				citynameHeaderCol.innerHTML = "CityName";
+				tr.appendChild(citynameHeaderCol);
+				var addressHeaderCol = document.createElement("th");
+				addressHeaderCol.scope = "col";
+				addressHeaderCol.innerHTML = "Address";
+				tr.appendChild(addressHeaderCol);
+				var suggesthoursHeaderCol = document.createElement("th");
+				suggesthoursHeaderCol.scope = "col";
+				suggesthoursHeaderCol.innerHTML = "SuggestHours";
+				tr.appendChild(suggesthoursHeaderCol);
+				var costHeaderCol = document.createElement("th");
+				costHeaderCol.scope = "col";
+				costHeaderCol.innerHTML = "Cost";
+				tr.appendChild(costHeaderCol);
+				var ratingHeaderCol = document.createElement("th");
+				ratingHeaderCol.scope = "col";
+				ratingHeaderCol.innerHTML = "Rating";
+				tr.appendChild(ratingHeaderCol);
+				var categoryHeaderCol = document.createElement("th");
+				categoryHeaderCol.scope = "col";
+				categoryHeaderCol.innerHTML = "Category";
+				tr.appendChild(categoryHeaderCol);
+				var stateHeaderCol = document.createElement("th");
+				stateHeaderCol.scope = "col";
+				stateHeaderCol.innerHTML = "State";
+				tr.appendChild(stateHeaderCol);
+				thead.appendChild(tr);
+				table.appendChild(thead);
+				var tbody = document.createElement("tbody");
+				data.forEach(function(spot) {
+					var tr = document.createElement("tr");
+					var imgurl = document.createElement("td");
+					var img = document.createElement("iframe");
+					img.src = spot["imgurl"];
+					imgurl.appendChild(img);
+					tr.appendChild(imgurl);
+					var spotname = document.createElement("td");
+					spotname.innerHTML = spot["spotname"];
+					tr.appendChild(spotname);
+					var cityname = document.createElement("td");
+					cityname.innerHTML = spot["cityname"];
+					tr.appendChild(cityname);
+					var address = document.createElement("td");
+					address.innerHTML = spot["address"];
+					tr.appendChild(address);
+					var suggesthours = document.createElement("td");
+					suggesthours.innerHTML = spot["suggesthours"];
+					tr.appendChild(suggesthours);
+					var cost = document.createElement("td");
+					cost.innerHTML = spot["cost"];
+					tr.appendChild(cost);
+					var rating = document.createElement("td");
+					rating.innerHTML = spot["rating"];
+					tr.appendChild(rating);
+					var category = document.createElement("td");
+					category.innerHTML = spot["category"];
+					tr.appendChild(category);
+					var state = document.createElement("td");
+					state.innerHTML = spot["state"];
+					tr.appendChild(state);
+					tbody.appendChild(tr);
+				});
+				table.appendChild(tbody);
+				document.getElementById("table").appendChild(table);
+			 },
+			 error: function () {
+			     console.log("error occurred");
+			 }
+			  })	
+		};
+		$(function () {
+			$("#jsdropdown").change(function () {
+				var selectedText = $("#trips").find("option:selected").text();
+				var selectedValue = $("#trips").val();
+				console.log("selected value " + selectedValue);
+				var found = trips.find(element => element["tripid"] == selectedValue);
+				console.log("found is " + found);
+				getSpotDetails(found["suggestroutine"]);
+			});
+		});
+
+		$(document).ready(function(){
+			//Populate the dropdown
+			query = {"userid": 11}
+			$.ajax({
+			 type: "post",
+			 data: JSON.stringify(query),
+			 contentType: "application/json",
+			 dataType: "json",
+			 url: "/api/find_saved_trips",
+			 success: function (data) {
+				console.log(data);
+				//populate the dropdown with the returned trips
+				trips = data["trips"];
+				var select = document.createElement("select");
+				select.name = "trips";
+				select.id = "trips";
+				trips.forEach(function(x){
+					console.log("x is " + x["tripid"]);
+					var option = document.createElement("option");
+					option.value = x["tripid"]; 
+					option.text = x["tripid"];
+					select.appendChild(option);
+				});
+				document.getElementById("jsdropdown").appendChild(select);
+
+			 },
+			 error: function () {
+			     console.log("error occurred");
+			 }
+			  })	
+		});
+
+
+	</script>
+
+	<title>update</title>
+  </head>
+  <body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6" id="dropdown">
+				<div id="jsdropdown">
+				</div>
+			</div>
+		</div>
+		<div class="row table-responsive" id="table">
+		</div>
+	</div> 
+
+
+    <!-- Optional JavaScript; choose one of the two! -->
+    <!-- Option 1: Bootstrap Bundle with Popper 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+    -->
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
+  </body>
+</html>
 {% endblock %}

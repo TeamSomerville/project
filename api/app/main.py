@@ -40,31 +40,7 @@ def profile():
 
 @main.route('/update_rating', methods=["POST", "GET"])
 def ui_update_rating():
-    form = UpdateRatingForm()
-    if form.validate_on_submit():
-       query = {"spotid": "96", "rating": form.rating.data}
-       response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/update_rating", json=query)
-
-    query = {"spotid":96}
-    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
-    data = json.loads(response.text)
-    items = [dict(spotid=data["spotid"],
-	     spotname=data["spotname"],
-	     cityname=data["cityname"],
-	     address=data["address"],
-	     rating=data["rating"])]
-    # Declare your table
-    class SubTable(Table):
-       border = "Yes"
-       spotid = Col("Spot ID")
-       spotname = Col("Spot Name")
-       cityname = Col("City Name")
-       address = Col("Address")
-       rating = Col("Rating")
-           
-       # Populate the table
-    table = SubTable(items)
-    return render_template("update.html", form=form, table=table)
+    return render_template("update.html")
 
 @main.route('/save_trip', methods=["POST", "GET"])
 def ui_save_trip():
