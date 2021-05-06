@@ -19,6 +19,17 @@
 			var checkid = event.target.id;
 			var spotid = checkid.substring(3);
 			console.log("spotid from checkbox is " + spotid);
+			//change new rating background to yellow
+			$('#new'+spotid).html("");	
+			if (event.target.checked){
+				$('#new'+spotid).css('background','white');
+				$('#new'+spotid).css('color','black');
+				$('#new'+spotid).attr('contenteditable','true');
+			}else{
+				$('#new'+spotid).css('background','gray');
+				$('#new'+spotid).css('color','white');
+				$('#new'+spotid).attr('contenteditable','false');
+			}
 		};
 
 		
@@ -107,7 +118,6 @@
 					var newrating = document.createElement("td");
 					newrating.id = "new" + spot["spotid"];
 					newrating.setAttribute("class", "new");
-					newrating.contentEditable = 'true';
 					newrating.innerHTML = "";
 					tr.appendChild(newrating);
 					var category = document.createElement("td");
@@ -148,7 +158,27 @@
 			 url: "/api/update_rating",
 			 success: function (data) {
 				console.log(data);
-				//populate the dropdown with the returned trips
+				getSingleSpotDetails(spotid);
+			 },
+			 error: function () {
+			     console.log("error occurred");
+			 }
+			  })	
+		};
+
+		function getSingleSpotDetails(spotid){
+			query = {"spotid": spotid}
+			$.ajax({
+			 type: "post",
+			 data: JSON.stringify(query),
+			 contentType: "application/json",
+			 dataType: "json",
+			 url: "/api/find_spot_details",
+			 success: function (data) {
+				console.log(data);
+				//populate the row rating
+				$('#'+spotid).html(data["rating"]);	
+				$('#new'+spotid).html("");	
 
 			 },
 			 error: function () {
@@ -156,6 +186,7 @@
 			 }
 			  })	
 		};
+
 		$(document).ready(function(){
 			$('#mybutton').click(function (e) {
 				console.log("my button clicked");
