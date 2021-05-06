@@ -3,13 +3,16 @@ from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
 from app.forms import UpdateRatingForm, SaveTripForm
 from app.nosql import getCollection, saveDocument
+import heapq
 import json
 import requests
 main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    data = dict()
+    data['username'] = "weix"
+    return render_template('login.html',data = data)
 
 @main.route("/item/int:userid> <int:tripid>", methods=["GET", "POST"])
 def deleteusertrip(tripid):
@@ -38,15 +41,17 @@ def front_adduser():
 
 @main.route("/front_login", methods=["POST"])
 def login():
-    email = request.form["email"]
     username = request.form['username']
     password = request.form['password']
+    query = {'username':username,'password':password}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_user_id",json=query)
     data = json.loads(response.text)
     if data['userid']==None:
-        return render_template("login.html")
+        data = dict()
+        data['username'] = None
+        return render_template("login.html",data=data)
     data['username'] = username
-    return render_template("destination.html")
+    return render_template("destination.html",data = json.dumps(data))
 
 @main.route("/profile")
 def profile():
@@ -117,7 +122,99 @@ def ui_save_trip():
 
 @main.route('/destination')
 def destination():
-    return render_template('destination.html')
+    return render_template('destination.html',data=data)
+
+
+@main.route('/tripsummary')
+def tripsummary():
+    def optimizeroutine(spotposition): #spotposition type: {97: [21.2910619, -157.843481],..., 98: [21.2629444, -157.8041957]}
+        edges = dict()
+        ids = list(spotposition.keys())
+        for i in range(len(ids)):
+            edges[ids[i]] = dict()
+        for i in range(len(ids)):
+            for j in range(i+1,len(ids)):
+                posi = spotposition[ids[i]]
+                posj = spotposition[ids[j]]
+                dis = abs(posi[0]-posj[0])*100**2+abs(posi[1]-posj[1])*100**2
+                edges[ids[i]][ids[j]] = dis
+                edges[ids[j]][ids[i]] = dis
+        routine = []
+        routine.append(ids[0])
+        hq = []
+        for edge in edges[ids[0]]:
+            hq.append([edges[ids[0]][edge],edge])
+        heapq.heapify(hq)
+        while len(hq)>0:
+            dis,nxt = heapq.heappop(hq)
+            routine.append(nxt)
+            for i in range(len(hq)):
+                vertices = hq[i]
+                if edges[nxt][vertices[1]]<vertices[0]:
+                    hq[i][0] = edges[nxt][vertices[1]]
+        return routine
+    trip_data = dict()
+    
+    data = dict()#synthetic data, should get from activity page user input
+    data['spotids'] = [122, 124, 123, 147, 105, 96, 102, 110, 119, 117, 134, 
+                        133, 144, 143, 145, 121, 99, 135, 136, 146, 137, 
+                        111, 125, 101, 131, 97, 112, 107, 127, 106, 139]
+    data['from_city'] = 'Seattle, WA'
+    data['to_city'] =  'Honolulu, HI'
+    data['destination_cityid'] = 51
+
+    #calculate flight information
+    query = {'from_city':data['from_city'],'to_city':data['to_city']}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_flight_details",json=query)
+    flights = json.loads(response.text)
+    flight_cost = 0
+    flight_duration = 0
+    for flight in flights:
+        flight_cost += float(flight['avgcost'])
+        flight_duration += float(flight['duration'])
+    flight_cost =flight_cost/2*1.2
+
+    #calculate spot information
+    spotids = data['spotids']
+    query = {'spotids': spotids}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_many_spot_details",json=query)
+    details = json.loads(response.text)
+    spotposition = dict()
+    act_cost = 0
+    act_duration = 0
+    avgrating = 0
+    n=0
+    for spot in details:
+        n+=1
+        spotposition[spot['spotid']] = [float(spot['lat']),(spot['lng']),spot['suggesthours']]
+        act_cost+=float(spot['cost'])
+        act_duration+=(float(spot['suggesthours'])+0.5)
+        avgrating+=float(spot['rating'])
+    avgrating/=n
+    routine = optimizeroutine(spotposition)
+    suggestdays = 1 + (act_duration + flight_duration)//8
+
+    #calculate accomendation cost
+    query = {"cityid": data['destination_cityid']}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_city_cost",json=query)
+    accomendation = json.loads(response.text)
+    staycost = (suggestdays-1)*accomendation['avghotelcost']
+    mealcost = suggestdays*accomendation['avgmealcost']*2
+    rentalcost = (suggestdays-1)*accomendation['avgcarrental']
+
+    #import information into a dict format
+    trip_data['routine'] = routine
+    trip_data['totalcost'] = round(act_cost+flight_cost+staycost+mealcost+rentalcost,2)
+    trip_data['suggestdays'] = suggestdays
+    trip_data['avgrating'] = round(avgrating,2)
+    trip_data['totalactivities'] = n
+    trip_data['flightduration'] = round(flight_duration,2)
+    trip_data['flightcost'] = flight_cost
+    trip_data['activitycost'] = act_cost
+    trip_data['activityduration'] = round(act_duration,2)
+    trip_data['othercost'] = staycost+mealcost+rentalcost
+
+    return render_template('tripsummary.html',trip_data=trip_data)
 
 @main.route('/map')
 def map():
@@ -862,3 +959,5 @@ def save_trip():
     datadict["ReturnCode"] = 200
     json_data = json.dumps(datadict)
     return json_data
+
+
