@@ -40,7 +40,11 @@ def profile():
 
 @main.route('/update_rating', methods=["POST", "GET"])
 def ui_update_rating():
-    return render_template("update.html")
+    userid  = request.args.get('userid', None)
+    tripid = request.args.get('tripid', None)
+    userid = 11
+    tripid = 33
+    return render_template("update.html", userid=userid, tripid=tripid)
 
 @main.route('/save_trip', methods=["POST", "GET"])
 def ui_save_trip():
@@ -93,7 +97,8 @@ def map():
 
 @main.route('/activity')
 def activity():
-    query = {'city':'Honolulu, HI'}
+    city = request.args.get('city', None)
+    query = {'city':'{}'.format(city)}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_city_spotids", json=query)
     data = json.loads(response.text)
     spotids = data['spotids']
@@ -483,6 +488,37 @@ def find_saved_trips():
         
     datadict["trips"] = trips
     json_data = json.dumps(datadict)
+    return json_data
+
+@main.route("/api/find_trip_details", methods=["GET","POST"])
+def api_find_trip_details():
+    """ 
+    Input Json Example
+    {
+      "tripid": 3
+    }
+    Return Json Example
+    {"avgcost": 3}
+    """
+    data  = request.json or {}
+    #get trip details
+    details = find_trip_details(data["tripid"])
+    trip = {}
+    trip["tripid"] = data["tripid"]
+    trip["totalduration"] = details[1]
+    trip["totalcost"] = details[2]
+    trip["activityduration"] = details[3]
+    trip["activitycost"] = details[4]
+    trip["transportationtime"] = details[5]
+    trip["transportationcost"] = details[6]
+    trip["staycost"] = details[7]
+    trip["foodcost"] = details[8]
+    trip["toflightid"] = details[9]
+    trip["backflightid"] = details[10]
+    trip["suggestdays"] = details[11]
+    trip["suggestroutine"] = details[12]
+        
+    json_data = json.dumps(trip)
     return json_data
 
 def find_trip_details(tripid):
