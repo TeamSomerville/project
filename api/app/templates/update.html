@@ -30,7 +30,6 @@
 			}
 		};
 
-		
 		function getSpotDetails(spotids){
 			console.log("spotids are " + spotids);
 			query = {"spotids": spotids, "userid": 11}
@@ -96,8 +95,9 @@
 					checktd.appendChild(inp);
 					tr.appendChild(checktd);
 					var imgurl = document.createElement("td");
-					var img = document.createElement("iframe");
+					var img = document.createElement("img");
 					img.src = spot["imgurl"];
+					img.setAttribute("class", "img-fluid");
 					imgurl.appendChild(img);
 					tr.appendChild(imgurl);
 					var spotname = document.createElement("td");
