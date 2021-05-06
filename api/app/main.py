@@ -325,6 +325,28 @@ def find_spot_details():
     print (json_data)
     return json_data
 
+@main.route("/api/find_flight_details", methods=["POST"])
+def find_flight_details():
+    """ 
+    Input Json Example
+    {
+      "from_city": "xxx",
+      "to_city": "yyy"
+    }
+    Return Json Example
+    {
+        "flightid": 96,
+        "avgcost": 10,
+        "duration": 10
+    }
+    """
+    data  = request.json or {}
+    query = "select flightid, avgcost, duration from public.find_flight_details('{0}', '{1}')".format(data["from_city"], data["to_city"])
+    dataset= connect(query)
+    datadict = [dict(flightid=x[0], avgcost=x[1], duration=x[2]) for x in dataset]
+    json_data = json.dumps(datadict)
+    return json_data
+
 @main.route("/api/find_city_cost", methods=["POST"])
 def find_city_cost():
     """ 
