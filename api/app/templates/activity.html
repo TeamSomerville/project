@@ -32,8 +32,9 @@
 			//}
 		};
 		$(document).ready(function(){
-			var city = $('#city').text();
-			getSpotsForCity(city);
+			var from_city = $('#from_city').text();
+			var to_city = $('#to_city').text();
+			getSpotsForCity(to_city);
 
 		});
 
@@ -161,7 +162,8 @@
 	<title>activity</title>
   </head>
   <body>
-	<div id="city" hidden>{{ city }}</div>
+	<div id="from_city" hidden>{{ from_city }}</div>
+	<div id="to_city" hidden>{{ to_city }}</div>
 	<div class="container">
 		<div class="row">
 			<div class="col-md-6" id="dropdown">
