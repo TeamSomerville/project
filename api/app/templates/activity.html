@@ -305,7 +305,6 @@
 			 dataType: "json",
 			 url: "/api/find_city_spotids",
 			 success: function (data) {
-				console.log("spotids " + data["spotids"]);
 				getSpotDetails(data["spotids"]);
 			 },
 			 error: function () {

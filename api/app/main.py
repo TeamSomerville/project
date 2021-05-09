@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
 from app.forms import UpdateRatingForm, SaveTripForm
-from app.nosql import getCollection, saveDocument
+from app.nosql import getCollection, saveDocument, deleteDocument
 import heapq
 import json
 import requests
@@ -906,6 +906,9 @@ def delete_usertrip():
        datadict["ReturnCode"] = dataset[0][0]
     else:
        datadict["ReturnCode"] = 200
+
+    #Deleting the document from mongodb
+    deleteDocument(params); 
     json_data = json.dumps(datadict)
     return json_data
 
