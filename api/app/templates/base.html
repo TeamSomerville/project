@@ -11,33 +11,19 @@
 
 <body>
     <section class="hero is-primary is-fullheight">
-
         <div class="hero-head">
             <nav class="navbar">
                 <div class="container">
-
                     <div id="navbarMenuHeroA" class="navbar-menu">
                         <div class="navbar-end">
-                            <a href="{{ url_for('main.index') }}" class="navbar-item">
-                                Home
+                            <a href="{{ url_for('main.destination') }}" class="navbar-item">
+                                Destination
                             </a>
                             <a href="{{ url_for('main.profile') }}" class="navbar-item">
                                 Profile
                             </a>
-                            <a href="{{ url_for('main.destination') }}" class="navbar-item">
-                                Destination
-                            </a>
-                            <a href="{{ url_for('main.activity') }}" class="navbar-item">
-                                Activity
-                            </a>
-                            <a href="{{ url_for('main.ui_update_rating') }}" class="navbar-item">
-                                Update Rating
-                            </a>
-                            <a href="{{ url_for('main.ui_save_trip') }}" class="navbar-item">
-                                Save Trip
-                            </a>
                             <a href="{{ url_for('auth.login') }}" class="navbar-item">
-                                Login
+                                login
                             </a>
                             <a href="{{ url_for('auth.signup') }}" class="navbar-item">
                                 Sign Up
