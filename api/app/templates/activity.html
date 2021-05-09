@@ -15,6 +15,7 @@
     function(data) { }); return false; }); }); </script> 
 
 	<script type="text/javascript">
+	
 		function checkbox_clicked(event){
 			var checkid = event.target.id;
 			var spotid = checkid.substring(3);
@@ -35,8 +36,116 @@
 			var from_city = $('#from_city').text();
 			var to_city = $('#to_city').text();
 			getSpotsForCity(to_city);
-
+			$("#tripsummary").click(function (e) {
+				console.log("my button clicked");
+				//loop through the table
+				var spotids = [];
+				$('#table1 tbody tr').each( function(i) {
+					var chkbox = $(this).find('input[type="checkbox"]');
+					if (chkbox.prop("checked")){
+						var spotid = chkbox.prop("id").substring(3);
+						spotids.push(spotid);
+					}
+				});
+				createTripSummaryTable(spotids, from_city, to_city);
+			});
 		});
+
+		function createTripSummaryTable(spotids, from_city, to_city){
+			console.log("spotids for trip summary are " + spotids);
+			query = {"spotids": spotids, "from_city": from_city, "to_city": to_city}
+			$.ajax({
+			 type: "post",
+			 data: JSON.stringify(query),
+			 contentType: "application/json",
+			 dataType: "json",
+			 url: "/api/get_trip_summary",
+			 success: function (data) {
+				if ($("#table1").length > 0){
+					document.getElementById("table").removeChild(document.getElementById("table1"));
+				}
+				$("#submittrip").hidden = "False";
+				var table = document.createElement("table");
+				table.id = "table2";
+				table.class = "table table-bordered";
+				var thead = document.createElement("thead");
+				var tr = document.createElement("tr");
+				var totalcostHeaderCol = document.createElement("th");
+				totalcostHeaderCol.scope = "col";
+				totalcostHeaderCol.innerHTML = "TotalCost";
+				tr.appendChild(totalcostHeaderCol);
+				var numdaysHeaderCol = document.createElement("th");
+				numdaysHeaderCol.scope = "col";
+				numdaysHeaderCol.innerHTML = "#Days";
+				tr.appendChild(numdaysHeaderCol);
+				var avgratingHeaderCol = document.createElement("th");
+				avgratingHeaderCol .scope = "col";
+				avgratingHeaderCol.innerHTML = "Avg.Rating";
+				tr.appendChild(avgratingHeaderCol);
+				var activitiesHeaderCol = document.createElement("th");
+				activitiesHeaderCol.scope = "col";
+				activitiesHeaderCol.innerHTML = "#Activities";
+				tr.appendChild(activitiesHeaderCol);
+				var airdurationHeaderCol = document.createElement("th");
+				airdurationHeaderCol.scope = "col";
+				airdurationHeaderCol.innerHTML = "AirDuration(h)";
+				tr.appendChild(airdurationHeaderCol);
+				var aircostHeaderCol = document.createElement("th");
+				aircostHeaderCol.scope = "col";
+				aircostHeaderCol.innerHTML = "AirCost";
+				tr.appendChild(aircostHeaderCol);
+				var activitycostHeaderCol = document.createElement("th");
+				activitycostHeaderCol.scope = "col";
+				activitycostHeaderCol.innerHTML = "ActivityCost";
+				tr.appendChild(activitycostHeaderCol);
+				var activitydurationHeaderCol = document.createElement("th");
+				activitydurationHeaderCol.scope = "col";
+				activitydurationHeaderCol.innerHTML = "ActivityDuration(h)";
+				tr.appendChild(activitydurationHeaderCol);
+				var othercostHeaderCol = document.createElement("th");
+				othercostHeaderCol.scope = "col";
+				othercostHeaderCol.innerHTML = "Other Cost";
+				tr.appendChild(othercostHeaderCol);
+				thead.appendChild(tr);
+				table.appendChild(thead);
+				var tbody = document.createElement("tbody");
+					var tr = document.createElement("tr");
+					var totalcost = document.createElement("td");
+					totalcost.innerHTML = data["totalcost"];
+					tr.appendChild(totalcost);
+					var suggestdays = document.createElement("td");
+					suggestdays.innerHTML = data["suggestdays"];
+					tr.appendChild(suggestdays);
+					var avgrating = document.createElement("td");
+					avgrating.innerHTML = data["avgrating"];
+					tr.appendChild(avgrating);
+					var totalactivities = document.createElement("td");
+					totalactivities.innerHTML = data["totalactivities"];
+					tr.appendChild(totalactivities);
+					var flightduration = document.createElement("td");
+					flightduration.innerHTML = data["flightduration"];
+					tr.appendChild(flightduration);
+					var flightcost = document.createElement("td");
+					flightcost.innerHTML = data["flightcost"];
+					tr.appendChild(flightcost);
+					var activitycost = document.createElement("td");
+					activitycost.innerHTML = data["activitycost"];
+					tr.appendChild(activitycost);
+					var activityduration = document.createElement("td");
+					activityduration.innerHTML = data["activityduration"];
+					tr.appendChild(activityduration);
+					var othercost = document.createElement("td");
+					othercost.innerHTML = data["othercost"];
+					tr.appendChild(othercost);
+					tbody.appendChild(tr);
+				table.appendChild(tbody);
+				document.getElementById("table").appendChild(table);
+			 },
+			 error: function () {
+			     console.log("error occurred");
+			 }
+			  })	
+		}
 
 		function getSpotDetails(spotids){
 			console.log("spotids are " + spotids);
@@ -50,7 +159,12 @@
 			 success: function (data) {
 				//display each spot in a grid
 				//console.log("spot is " + data[0]["spotname"]);
+				if ($("#table2").length > 0){
+					document.getElementById("table").removeChild(document.getElementById("table2"));
+				}
+				$("#submittrip").hidden = "True";
 				var table = document.createElement("table");
+				table.id = "table1";
 				table.class = "table table-bordered";
 				var thead = document.createElement("thead");
 				var tr = document.createElement("tr");
@@ -165,14 +279,9 @@
 	<div id="from_city" hidden>{{ from_city }}</div>
 	<div id="to_city" hidden>{{ to_city }}</div>
 	<div class="container">
-		<div class="row">
-			<div class="col-md-6" id="dropdown">
-				<div id="jsdropdown">
-				</div>
-			</div>
-		</div>
-		<div class="row table-responsive" id="table">
-		</div>
+			<button id="tripsummary" class="btn btn-primary" type="button">Trip Summary</button>
+			<div class="row table-responsive" id="table">
+      			<input type = "button" id = "submittrip" value = "Save Trip" hidden/>
 	</div> 
 
     <!-- Optional JavaScript; choose one of the two! -->

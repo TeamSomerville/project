@@ -128,9 +128,33 @@ def destination():
        return redirect(url_for("main.activity", from_city=from_city, to_city=to_city))
     return render_template('destination.html')
 
-
-@main.route('/tripsummary')
-def tripsummary():
+@main.route('/api/get_trip_summary', methods=["POST"])
+def get_trip_summary():
+    """ 
+    Input Json Example
+    {
+      "spotids": [96,97,98],
+      "from_city": 96,
+      "to_city": 96
+    }
+    Return Json Example
+    {
+	    "routine": [
+		98,
+		97,
+		99
+	    ],
+	    "totalcost": 359.0,
+	    "suggestdays": 2.0,
+	    "avgrating": 4.29,
+	    "totalactivities": 3,
+	    "flightduration": 0,
+	    "flightcost": 0.0,
+	    "activitycost": 5.0,
+	    "activityduration": 10.5,
+	    "othercost": 354.0
+    }
+    """
     def optimizeroutine(spotposition): #spotposition type: {97: [21.2910619, -157.843481],..., 98: [21.2629444, -157.8041957]}
         edges = dict()
         ids = list(spotposition.keys())
@@ -157,19 +181,18 @@ def tripsummary():
                 if edges[nxt][vertices[1]]<vertices[0]:
                     hq[i][0] = edges[nxt][vertices[1]]
         return routine
+    data  = request.json or {}
+    print ("data from tripsummary {}".format(data))
+    url = "http://sp21-cs411-07.cs.illinois.edu"
+    query = { "city": data["to_city"] }
+    response = requests.post("{}/api/find_city_by_name".format(url),json=query)
     trip_data = dict()
-    
-    data = dict()#synthetic data, should get from activity page user input
-    data['spotids'] = [122, 124, 123, 147, 105, 96, 102, 110, 119, 117, 134, 
-                        133, 144, 143, 145, 121, 99, 135, 136, 146, 137, 
-                        111, 125, 101, 131, 97, 112, 107, 127, 106, 139]
-    data['from_city'] = 'Seattle, WA'
-    data['to_city'] =  'Honolulu, HI'
-    data['destination_cityid'] = 51
+    city = json.loads(response.text)
+    data['destination_cityid'] = city["cityid"]
 
     #calculate flight information
     query = {'from_city':data['from_city'],'to_city':data['to_city']}
-    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_flight_details",json=query)
+    response = requests.post("{}/api/find_flight_details".format(url),json=query)
     flights = json.loads(response.text)
     flight_cost = 0
     flight_duration = 0
@@ -181,7 +204,7 @@ def tripsummary():
     #calculate spot information
     spotids = data['spotids']
     query = {'spotids': spotids}
-    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_many_spot_details",json=query)
+    response = requests.post("{}/api/find_many_spot_details".format(url),json=query)
     details = json.loads(response.text)
     spotposition = dict()
     act_cost = 0
@@ -200,7 +223,7 @@ def tripsummary():
 
     #calculate accomendation cost
     query = {"cityid": data['destination_cityid']}
-    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_city_cost",json=query)
+    response = requests.post("{}/api/find_city_cost".format(url),json=query)
     accomendation = json.loads(response.text)
     staycost = (suggestdays-1)*accomendation['avghotelcost']
     mealcost = suggestdays*accomendation['avgmealcost']*2
@@ -218,13 +241,14 @@ def tripsummary():
     trip_data['activityduration'] = round(act_duration,2)
     trip_data['othercost'] = staycost+mealcost+rentalcost
 
-    return render_template('tripsummary.html',trip_data=trip_data)
+    json_data = json.dumps(trip_data)
+    return json_data
 
 @main.route('/map')
 def map():
     return render_template('map.html')
 
-@main.route('/activity')
+@main.route('/activity', methods=["POST", "GET"])
 def activity():
     from_city = request.args.get('from_city', None)
     to_city = request.args.get('to_city', None)
