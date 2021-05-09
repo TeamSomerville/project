@@ -167,6 +167,99 @@ def find_mongo_collection():
     json_data = json.dumps(dataset[0])
     return json_data
 
+def get_features_from_route(route):
+    #fetch the spots of the suggested routes
+    spots = []
+    features = []
+    seq = 0
+    for spotid in route:
+        seq += 1
+        spot = find_spot_details_db(spotid)
+        dic = dict(lat=spot[0][10], lng=spot[0][11])
+        spots.append(dic)
+        #create spot geojson
+        point = dict(type="Feature",
+                     geometry=dict(type="Point",
+                                   coordinates=[dic["lng"],dic["lat"]]),
+                     properties=dict(name="{0}:{1}:{2}hrs".format(seq, spot[0][0], spot[0][4]))
+                )
+        features.append(point)
+
+    #create geojson line
+    line = dict(type="Feature",
+                       geometry=dict(type="LineString",
+                                     coordinates=[[x["lng"],x["lat"]] for x in spots]),
+                       properties=dict(name="route")
+                      ) 
+    features.append(line) 
+    return features
+
+@main.route("/api/get_geojson_from_route", methods=["POST"])
+def get_geojson_from_route():
+    """ 
+    Input Json Example
+    [97,98]
+    Return Json Example
+	{
+	    "type": "FeatureCollection",
+	    "features": [
+		{
+		    "type": "Feature",
+		    "geometry": {
+			"type": "Point",
+			"coordinates": [
+			    -157.843481,
+			    21.2910619
+			]
+		    },
+		    "properties": {
+			"name": "1:Ala Moana Center"
+		    }
+		},
+		{
+		    "type": "Feature",
+		    "geometry": {
+			"type": "Point",
+			"coordinates": [
+			    -157.8041957,
+			    21.2629444
+			]
+		    },
+		    "properties": {
+			"name": "2:Diamond Head Crater Hike"
+		    }
+		},
+		{
+		    "type": "Feature",
+		    "geometry": {
+			"type": "LineString",
+			"coordinates": [
+			    [
+				-157.843481,
+				21.2910619
+			    ],
+			    [
+				-157.8041957,
+				21.2629444
+			    ]
+			]
+		    },
+		    "properties": {
+			"name": "route"
+		    }
+		}
+	    ]
+	}
+    """
+    data  = request.json or {}
+    print (data)
+    features = get_features_from_route(data)
+
+    geoDoc = dict(type="FeatureCollection",
+                  features=features)
+    json_data = json.dumps(geoDoc)
+    return json_data
+
 @main.route("/api/find_city_by_name", methods=["POST"])
 def find_city_by_name():
     """ 
@@ -727,30 +820,7 @@ def save_trip():
     tripid = dataset[0][0]
     add_user_trip(data["userid"], tripid)
 
-    #fetch the spots of the suggested routes
-    spots = []
-    features = []
-    seq = 0
-    for spotid in data["suggestroutine"]:
-        seq += 1
-        spot = find_spot_details_db(spotid)
-        dic = dict(lat=spot[0][10], lng=spot[0][11])
-        spots.append(dic)
-        #create spot geojson
-        point = dict(type="Feature",
-                     geometry=dict(type="Point",
-                                   coordinates=[dic["lng"],dic["lat"]]),
-                     properties=dict(name="{0}:{1}".format(seq, spot[0][0]))
-                )
-        features.append(point)
-
-    #create geojson line
-    line = dict(type="Feature",
-                       geometry=dict(type="LineString",
-                                     coordinates=[[x["lng"],x["lat"]] for x in spots]),
-                       properties=dict(name="route")
-                      ) 
-    features.append(line) 
+    features = get_features_from_route(data["suggestroutine"])
 
     geoDoc = dict(type="FeatureCollection",
                   userid=data["userid"],
