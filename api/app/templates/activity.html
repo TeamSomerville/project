@@ -14,48 +14,27 @@
     <script type=text/javascript> $(function() { $("#submittrip").click(function (event) { $.getJSON('/tripsummary', { },
     function(data) { }); return false; }); }); </script> 
 
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
 	<script type="text/javascript">
-		$(function () {
-			$("#jsdropdown").change(function () {
-				var selectedText = $("#cities").find("option:selected").text();
-				var selectedValue = $("#cities").val();
-				console.log("selected value " + selectedValue);
-				getSpotsForCity(selectedValue);
-			});
-		});
-
+		function checkbox_clicked(event){
+			var checkid = event.target.id;
+			var spotid = checkid.substring(3);
+			console.log("spotid from checkbox is " + spotid);
+			//change new rating background to yellow
+			//$('#new'+spotid).html("");	
+			//if (event.target.checked){
+			//	$('#new'+spotid).css('background','white');
+			//	$('#new'+spotid).css('color','black');
+			//	$('#new'+spotid).attr('contenteditable','true');
+			//}else{
+			//	$('#new'+spotid).css('background','gray');
+			//	$('#new'+spotid).css('color','white');
+			//	$('#new'+spotid).attr('contenteditable','false');
+			//}
+		};
 		$(document).ready(function(){
-			//Populate the dropdown
-			console.log("starting point...");
-			$.ajax({
-			 type: "get",
-			 contentType: "application/json",
-			 dataType: "json",
-			 url: "/api/find_destinations",
-			 success: function (data) {
-				console.log(data);
-				//populate the dropdown with the returned cities
-				var cities = data["cities"];
-				var select = document.createElement("select");
-				console.log(select);
-				select.name = "cities";
-				select.id = "cities";
-				$.each(cities, function(x, y){
-					console.log("x " + x + " y " + y);
-					var option = document.createElement("option");
-					option.value = y;
-					option.text = y;
-					select.appendChild(option);
-				});
-				document.getElementById("jsdropdown").appendChild(select);
-				getSpotsForCity("Honolulu, HI");
+			var city = $('#city').text();
+			getSpotsForCity(city);
 
-			 },
-			 error: function () {
-			     console.log("error occurred");
-			 }
-			  })	
 		});
 
 		function getSpotDetails(spotids){
@@ -74,6 +53,9 @@
 				table.class = "table table-bordered";
 				var thead = document.createElement("thead");
 				var tr = document.createElement("tr");
+				var check = document.createElement("th");
+				check.scope = "col";
+				tr.appendChild(check);
 				var imgurlHeaderCol = document.createElement("th");
 				imgurlHeaderCol.scope = "col";
 				tr.appendChild(imgurlHeaderCol);
@@ -86,9 +68,6 @@
 				citynameHeaderCol.innerHTML = "CityName";
 				tr.appendChild(citynameHeaderCol);
 				var addressHeaderCol = document.createElement("th");
-				addressHeaderCol.scope = "col";
-				addressHeaderCol.innerHTML = "Address";
-				tr.appendChild(addressHeaderCol);
 				var suggesthoursHeaderCol = document.createElement("th");
 				suggesthoursHeaderCol.scope = "col";
 				suggesthoursHeaderCol.innerHTML = "SuggestHours";
@@ -97,30 +76,10 @@
 				costHeaderCol.scope = "col";
 				costHeaderCol.innerHTML = "Cost";
 				tr.appendChild(costHeaderCol);
-				var autismHeaderCol = document.createElement("th");
-				autismHeaderCol.scope = "col";
-				autismHeaderCol.innerHTML = "AutismFriendly";
-				tr.appendChild(autismHeaderCol);
-				var opendayHeaderCol = document.createElement("th");
-				opendayHeaderCol.scope = "col";
-				opendayHeaderCol.innerHTML = "OpenDay";
-				tr.appendChild(opendayHeaderCol);
-				var opennightHeaderCol = document.createElement("th");
-				opennightHeaderCol.scope = "col";
-				opennightHeaderCol.innerHTML = "OpenNight";
-				tr.appendChild(opennightHeaderCol);
 				var ratingHeaderCol = document.createElement("th");
 				ratingHeaderCol.scope = "col";
 				ratingHeaderCol.innerHTML = "Rating";
 				tr.appendChild(ratingHeaderCol);
-				var introHeaderCol = document.createElement("th");
-				introHeaderCol.scope = "col";
-				introHeaderCol.innerHTML = "Introduction";
-				tr.appendChild(introHeaderCol);
-				var websiteHeaderCol = document.createElement("th");
-				websiteHeaderCol.scope = "col";
-				websiteHeaderCol.innerHTML = "Website";
-				tr.appendChild(websiteHeaderCol);
 				var categoryHeaderCol = document.createElement("th");
 				categoryHeaderCol.scope = "col";
 				categoryHeaderCol.innerHTML = "Category";
@@ -134,9 +93,17 @@
 				var tbody = document.createElement("tbody");
 				data.forEach(function(spot) {
 					var tr = document.createElement("tr");
+					var checktd = document.createElement("td");
+					var inp = document.createElement("input");
+					inp.type = "checkbox";
+					inp.id = "inp" + spot["spotid"];
+					inp.addEventListener("click", checkbox_clicked);	
+					checktd.appendChild(inp);
+					tr.appendChild(checktd);
 					var imgurl = document.createElement("td");
-					var img = document.createElement("iframe");
+					var img = document.createElement("img");
 					img.src = spot["imgurl"];
+					img.setAttribute("class", "img-fluid");
 					imgurl.appendChild(img);
 					tr.appendChild(imgurl);
 					var spotname = document.createElement("td");
@@ -145,33 +112,15 @@
 					var cityname = document.createElement("td");
 					cityname.innerHTML = spot["cityname"];
 					tr.appendChild(cityname);
-					var address = document.createElement("td");
-					address.innerHTML = spot["address"];
-					tr.appendChild(address);
 					var suggesthours = document.createElement("td");
 					suggesthours.innerHTML = spot["suggesthours"];
 					tr.appendChild(suggesthours);
 					var cost = document.createElement("td");
 					cost.innerHTML = spot["cost"];
 					tr.appendChild(cost);
-					var autism = document.createElement("td");
-					autism.innerHTML = spot["autismfriendly"];
-					tr.appendChild(autism);
-					var openday = document.createElement("td");
-					openday.innerHTML = spot["openday"];
-					tr.appendChild(openday);
-					var opennight = document.createElement("td");
-					opennight.innerHTML = spot["opennight"];
-					tr.appendChild(opennight);
 					var rating = document.createElement("td");
 					rating.innerHTML = spot["rating"];
 					tr.appendChild(rating);
-					var intro = document.createElement("td");
-					intro.innerHTML = spot["introduction"];
-					tr.appendChild(intro);
-					var website = document.createElement("td");
-					website.innerHTML = spot["website"];
-					tr.appendChild(website);
 					var category = document.createElement("td");
 					category.innerHTML = spot["category"];
 					tr.appendChild(category);
@@ -212,6 +161,7 @@
 	<title>activity</title>
   </head>
   <body>
+	<div id="city" hidden>{{ city }}</div>
 	<div class="container">
 		<div class="row">
 			<div class="col-md-6" id="dropdown">
