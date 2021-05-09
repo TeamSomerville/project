@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, redirect, url_for
 from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
 from app.forms import UpdateRatingForm, SaveTripForm
@@ -120,9 +120,13 @@ def ui_save_trip():
     table = SubTable(items)
     return render_template("trip.html", form=form, table=table)
 
-@main.route('/destination')
+@main.route('/destination', methods=["POST", "GET"])
 def destination():
-    return render_template('destination.html',data=data)
+    if request.method == "POST":
+       from_city = request.form["from_city"]
+       to_city = request.form["to_city"]
+       return redirect(url_for("main.activity", from_city=from_city, to_city=to_city))
+    return render_template('destination.html')
 
 
 @main.route('/tripsummary')
@@ -222,9 +226,9 @@ def map():
 
 @main.route('/activity')
 def activity():
-    city = request.args.get('city', None)
-    city = "Honolulu, HI"
-    query = {'city':'{}'.format(city)}
+    from_city = request.args.get('from_city', None)
+    to_city = request.args.get('to_city', None)
+    query = {'city':'{}'.format(to_city)}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_city_spotids", json=query)
     data = json.loads(response.text)
     spotids = data['spotids']
@@ -234,7 +238,7 @@ def activity():
       resp = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
       details = json.loads(resp.text)
       spotname.append(details["spotname"])
-    return render_template('activity.html',data = spotname, city=city)
+    return render_template('activity.html',data = spotname, from_city=from_city, to_city=to_city)
     
 @main.route("/front_savetrip")
 def front_savetrip():
