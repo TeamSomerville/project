@@ -51,7 +51,7 @@ def login():
         data['username'] = None
         return render_template("login.html",data=data)
     data['username'] = username
-    return render_template("destination.html",data = json.dumps(data))
+    return render_template("destination.html",userid = data["userid"])
 
 @main.route("/profile")
 def profile():
@@ -125,7 +125,8 @@ def destination():
     if request.method == "POST":
        from_city = request.form["from_city"]
        to_city = request.form["to_city"]
-       return redirect(url_for("main.activity", from_city=from_city, to_city=to_city))
+       userid = request.form["userid"]
+       return redirect(url_for("main.activity", from_city=from_city, to_city=to_city, userid=userid))
     return render_template('destination.html')
 
 @main.route('/api/get_trip_summary', methods=["POST"])
@@ -252,6 +253,7 @@ def map():
 def activity():
     from_city = request.args.get('from_city', None)
     to_city = request.args.get('to_city', None)
+    userid = request.args.get('userid', None)
     query = {'city':'{}'.format(to_city)}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_city_spotids", json=query)
     data = json.loads(response.text)
@@ -262,7 +264,7 @@ def activity():
       resp = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
       details = json.loads(resp.text)
       spotname.append(details["spotname"])
-    return render_template('activity.html',data = spotname, from_city=from_city, to_city=to_city)
+    return render_template('activity.html',data = spotname, from_city=from_city, to_city=to_city, userid=userid)
     
 @main.route("/front_savetrip")
 def front_savetrip():
@@ -971,7 +973,8 @@ def save_trip():
     dataset= call_fn(fn, params)
 
     #calling add_usertrip
-    tripid = dataset[0][0]
+    tripid = dataset[0][0] 
+    print ("trip id is {}".format(tripid))
     add_user_trip(data["userid"], tripid)
 
     features = get_features_from_route(data["suggestroutine"])

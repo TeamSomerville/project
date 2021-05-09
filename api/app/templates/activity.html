@@ -8,33 +8,24 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="   crossorigin=""/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-    
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>    
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
     <script type=text/javascript> $(function() { $("#submittrip").click(function (event) { $.getJSON('/tripsummary', { },
     function(data) { }); return false; }); }); </script> 
 
+	<style type="text/css">
+        #map { height: 600px;  width: 100%; position:inherited; }
+        </style>
 	<script type="text/javascript">
+
+		var global_seleted_spotids;
 	
-		function checkbox_clicked(event){
-			var checkid = event.target.id;
-			var spotid = checkid.substring(3);
-			console.log("spotid from checkbox is " + spotid);
-			//change new rating background to yellow
-			//$('#new'+spotid).html("");	
-			//if (event.target.checked){
-			//	$('#new'+spotid).css('background','white');
-			//	$('#new'+spotid).css('color','black');
-			//	$('#new'+spotid).attr('contenteditable','true');
-			//}else{
-			//	$('#new'+spotid).css('background','gray');
-			//	$('#new'+spotid).css('color','white');
-			//	$('#new'+spotid).attr('contenteditable','false');
-			//}
-		};
 		$(document).ready(function(){
 			var from_city = $('#from_city').text();
 			var to_city = $('#to_city').text();
+			var userid = $('#userid').text();
 			getSpotsForCity(to_city);
 			$("#tripsummary").click(function (e) {
 				console.log("my button clicked");
@@ -51,8 +42,43 @@
 			});
 		});
 
+		function saveTrip(){
+			
+			console.log("save trip spotids " + global_selected_spotids);
+		        query = {
+				      "userid": $('#userid').text(),
+				      "totalduration":$("#suggestdays").text(),
+				      "totalcost": $("#totalcost").text(),
+				      "activityduration": $("#activityduration").text(),
+				      "activitycost": $("#activitycost").text(),
+				      "transportationtime": $("#flightduration").text(),
+				      "transportationcost": $("#flightcost").text(),
+				      "staycost": $("#othercost").text(),
+				      "suggestdays": $("#suggestdays").text(),
+				      "suggestroutine": global_selected_spotids,
+				      "foodcost": 0,
+				      "toflightid": 3,
+				      "backflightid": 3 
+               			    }
+			$.ajax({
+			 type: "post",
+			 data: JSON.stringify(query),
+			 contentType: "application/json",
+			 dataType: "json",
+			 url: "/api/save_trip",
+			 success: function (data) {
+				$("#save").html("Saved!");
+			 },
+			 error: function () {
+			     console.log("error occurred");
+			 }
+			  })	
+		}
+
 		function createTripSummaryTable(spotids, from_city, to_city){
 			console.log("spotids for trip summary are " + spotids);
+			getMapData(spotids);
+			global_selected_spotids = spotids;
 			query = {"spotids": spotids, "from_city": from_city, "to_city": to_city}
 			$.ajax({
 			 type: "post",
@@ -63,11 +89,20 @@
 			 success: function (data) {
 				if ($("#table1").length > 0){
 					document.getElementById("table").removeChild(document.getElementById("table1"));
+					document.getElementById("contents").removeChild(document.getElementById("tripsummary"));
+					var save = document.createElement("button");
+					save.id = "save";
+					save.setAttribute("class", "btn btn-primary");
+					save.setAttribute("type", "button");
+					save.innerHTML = "Save Trip";
+					save.addEventListener("click", saveTrip);
+					document.getElementById("contents").appendChild(save);
 				}
-				$("#submittrip").hidden = "False";
+				
 				var table = document.createElement("table");
 				table.id = "table2";
 				table.class = "table table-bordered";
+				//HEADER
 				var thead = document.createElement("thead");
 				var tr = document.createElement("tr");
 				var totalcostHeaderCol = document.createElement("th");
@@ -109,35 +144,44 @@
 				thead.appendChild(tr);
 				table.appendChild(thead);
 				var tbody = document.createElement("tbody");
-					var tr = document.createElement("tr");
-					var totalcost = document.createElement("td");
-					totalcost.innerHTML = data["totalcost"];
-					tr.appendChild(totalcost);
-					var suggestdays = document.createElement("td");
-					suggestdays.innerHTML = data["suggestdays"];
-					tr.appendChild(suggestdays);
-					var avgrating = document.createElement("td");
-					avgrating.innerHTML = data["avgrating"];
-					tr.appendChild(avgrating);
-					var totalactivities = document.createElement("td");
-					totalactivities.innerHTML = data["totalactivities"];
-					tr.appendChild(totalactivities);
-					var flightduration = document.createElement("td");
-					flightduration.innerHTML = data["flightduration"];
-					tr.appendChild(flightduration);
-					var flightcost = document.createElement("td");
-					flightcost.innerHTML = data["flightcost"];
-					tr.appendChild(flightcost);
-					var activitycost = document.createElement("td");
-					activitycost.innerHTML = data["activitycost"];
-					tr.appendChild(activitycost);
-					var activityduration = document.createElement("td");
-					activityduration.innerHTML = data["activityduration"];
-					tr.appendChild(activityduration);
-					var othercost = document.createElement("td");
-					othercost.innerHTML = data["othercost"];
-					tr.appendChild(othercost);
-					tbody.appendChild(tr);
+				//BODY
+				var tr = document.createElement("tr");
+				var totalcost = document.createElement("td");
+				totalcost.id = "totalcost";
+				totalcost.innerHTML = data["totalcost"];
+				tr.appendChild(totalcost);
+				var suggestdays = document.createElement("td");
+				suggestdays.id = "suggestdays";
+				suggestdays.innerHTML = data["suggestdays"];
+				tr.appendChild(suggestdays);
+				var avgrating = document.createElement("td");
+				avgrating.id = "avgrating";
+				avgrating.innerHTML = data["avgrating"];
+				tr.appendChild(avgrating);
+				var totalactivities = document.createElement("td");
+				totalactivities.innerHTML = data["totalactivities"];
+				tr.appendChild(totalactivities);
+				var flightduration = document.createElement("td");
+				flightduration.id = "flightduration";
+				flightduration.innerHTML = data["flightduration"];
+				tr.appendChild(flightduration);
+				var flightcost = document.createElement("td");
+				flightcost.id = "flightcost";
+				flightcost.innerHTML = data["flightcost"];
+				tr.appendChild(flightcost);
+				var activitycost = document.createElement("td");
+				activitycost.id = "activitycost";
+				activitycost.innerHTML = data["activitycost"];
+				tr.appendChild(activitycost);
+				var activityduration = document.createElement("td");
+				activityduration.id = "activityduration";
+				activityduration.innerHTML = data["activityduration"];
+				tr.appendChild(activityduration);
+				var othercost = document.createElement("td");
+				othercost.id = "othercost";
+				othercost.innerHTML = data["othercost"];
+				tr.appendChild(othercost);
+				tbody.appendChild(tr);
 				table.appendChild(tbody);
 				document.getElementById("table").appendChild(table);
 			 },
@@ -162,7 +206,6 @@
 				if ($("#table2").length > 0){
 					document.getElementById("table").removeChild(document.getElementById("table2"));
 				}
-				$("#submittrip").hidden = "True";
 				var table = document.createElement("table");
 				table.id = "table1";
 				table.class = "table table-bordered";
@@ -212,7 +255,6 @@
 					var inp = document.createElement("input");
 					inp.type = "checkbox";
 					inp.id = "inp" + spot["spotid"];
-					inp.addEventListener("click", checkbox_clicked);	
 					checktd.appendChild(inp);
 					tr.appendChild(checktd);
 					var imgurl = document.createElement("td");
@@ -278,17 +320,51 @@
   <body>
 	<div id="from_city" hidden>{{ from_city }}</div>
 	<div id="to_city" hidden>{{ to_city }}</div>
+	<div id="userid" hidden>{{ userid }}</div>
 	<div class="container">
+		<div class="row" id="mapbox">
+			<div class="col-md-6" id="map"></div>
+		</div>
+		<div class="row" id="contents">
 			<button id="tripsummary" class="btn btn-primary" type="button">Trip Summary</button>
 			<div class="row table-responsive" id="table">
-      			<input type = "button" id = "submittrip" value = "Save Trip" hidden/>
+		</div>
 	</div> 
 
-    <!-- Optional JavaScript; choose one of the two! -->
-    <!-- Option 1: Bootstrap Bundle with Popper 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
-    -->
-    <!-- Option 2: Separate Popper and Bootstrap JS -->
+	<script type="text/javascript">
+	     function getMapData(spotids){
+		     var query = spotids;
+		     $.ajax({
+			 type: "post",
+			 data: JSON.stringify(query),
+			 contentType: "application/json",
+			 dataType: "json",
+			 url: "/api/get_geojson_from_route",
+			 success: function (data) {
+			     console.log(data);
+			     var home = [data.features[0].geometry.coordinates[1],data.features[0].geometry.coordinates[0]]; 
+			     $("#mapbox").html("");
+			     $("#mapbox").html('<div class="col-md-6" id="map"></div>');
+			     var mapInstance = L.map('map').setView(home, 11);
+			     var tiles = L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=4f3hBKrjDqQGPICv8MkY", {
+				 attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
+			     });
+			     tiles.addTo(mapInstance);
+			     var pointLayer = L.geoJson(null, {
+							 pointToLayer: function(feature, latlng){
+							     label = String(feature.properties.name);
+							     return new L.CircleMarker(latlng).bindTooltip(label, {permanent: true, opacity: 1}).openTooltip(); 
+							 }
+						     });
+			     pointLayer.addData(data);
+			     mapInstance.addLayer(pointLayer);
+			 },
+			 error: function () {
+			     console.log("error occurred");
+			 }
+			  })
+	      };
+	</script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
