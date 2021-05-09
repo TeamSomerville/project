@@ -223,6 +223,7 @@ def map():
 @main.route('/activity')
 def activity():
     city = request.args.get('city', None)
+    city = "Honolulu, HI"
     query = {'city':'{}'.format(city)}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_city_spotids", json=query)
     data = json.loads(response.text)
@@ -230,10 +231,10 @@ def activity():
     spotname = []
     for spotid in spotids[:5]:
       query = {'spotid':spotid}
-      request = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
-      details = json.loads(request.text)
+      resp = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_spot_details", json=query)
+      details = json.loads(resp.text)
       spotname.append(details["spotname"])
-    return render_template('activity.html',data = spotname)
+    return render_template('activity.html',data = spotname, city=city)
     
 @main.route("/front_savetrip")
 def front_savetrip():
