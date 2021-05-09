@@ -40,7 +40,7 @@ def createGeoJson(data):
        point = dict(type="Feature",
                     geometry=dict(type="Point",
                                   coordinates=[dic["lng"],dic["lat"]]),
-                    properties=dict(name="{0}:{1}".format(seq, spot[0][0]))
+                    properties=dict(name="{0}:{1}:{2}hrs".format(seq, spot[0][0], spot[0][4]))
                )
        features.append(point)
 
