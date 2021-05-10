@@ -952,6 +952,8 @@ def save_trip():
       "toflightid": 96,
       "backflightid": 96,
       "suggestdays": 96,
+      "fromcity": "cccc",
+      "tocity": "xxxx",
       "suggestroutine": [96, 23, 34]
     }
     Return Json Example
@@ -971,6 +973,8 @@ def save_trip():
     params.append((data["toflightid"], "text"))
     params.append((data["backflightid"], "text"))
     params.append((data["suggestdays"], "text"))
+    params.append((data["fromcity"], "text"))
+    params.append((data["tocity"], "text"))
     params.append((data["suggestroutine"], "array"))
     fn = "save_trip"
     dataset= call_fn(fn, params)
