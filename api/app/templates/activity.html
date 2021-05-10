@@ -57,8 +57,8 @@
 				      "suggestdays": $("#suggestdays").text(),
 				      "suggestroutine": global_selected_spotids,
 				      "foodcost": 0,
-				      "toflightid": 3,
-				      "backflightid": 3 
+				      "to_cityname": $('#to_city').text(),
+				      "from_cityname": $('#from_city').text()
                			    }
 			$.ajax({
 			 type: "post",
@@ -325,7 +325,7 @@
 			<div class="col-md-6" id="map"></div>
 		</div>
 		<div class="row" id="contents">
-			<button id="tripsummary" class="btn btn-primary" type="button">Trip Summary</button>
+			<button id="tripsummary" class="btn btn-primary" type="button">Go To Trip Summary</button>
 			<div class="row table-responsive" id="table">
 		</div>
 	</div> 

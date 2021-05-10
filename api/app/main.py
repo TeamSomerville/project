@@ -62,6 +62,8 @@ def profile():
     ids = []
     for i in range(len(data["trips"])):
         ids.append(data["trips"][i]["tripid"])
+    
+
     # Declare your table
     userid = Col("userid")
     class SubTable(Table):
@@ -949,8 +951,8 @@ def save_trip():
       "transportationcost": 96,
       "staycost": 96,
       "foodcost": 96,
-      "toflightid": 96,
-      "backflightid": 96,
+      "to_cityname": Seattle, WA,
+      "from_cityname": Honolulu, HI,
       "suggestdays": 96,
       "suggestroutine": [96, 23, 34]
     }
@@ -968,10 +970,14 @@ def save_trip():
     params.append((data["transportationcost"], "text"))
     params.append((data["staycost"], "text"))
     params.append((data["foodcost"], "text"))
-    params.append((data["toflightid"], "text"))
-    params.append((data["backflightid"], "text"))
+    params.append((data["to_cityname"], "text"))
+    params.append((data["from_cityname"], "text"))
     params.append((data["suggestdays"], "text"))
     params.append((data["suggestroutine"], "array"))
+
+    print("from city::")
+    print(data["from_cityname"])
+
     fn = "save_trip"
     dataset= call_fn(fn, params)
 
