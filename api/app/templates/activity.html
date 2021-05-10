@@ -12,8 +12,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>    
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
-    <script type=text/javascript> $(function() { $("#submittrip").click(function (event) { $.getJSON('/tripsummary', { },
-    function(data) { }); return false; }); }); </script> 
 
 	<style type="text/css">
         #map { height: 600px;  width: 100%; position:inherited; }
@@ -23,6 +21,7 @@
 		var global_seleted_spotids;
 	
 		$(document).ready(function(){
+			$("#mapbox").css("display", "none");
 			var from_city = $('#from_city').text();
 			var to_city = $('#to_city').text();
 			var userid = $('#userid').text();
@@ -57,8 +56,8 @@
 				      "suggestdays": $("#suggestdays").text(),
 				      "suggestroutine": global_selected_spotids,
 				      "foodcost": 0,
-				      "toflightid": 3,
-				      "backflightid": 3 
+				      "to_cityname": $('#to_city').text(),
+				      "from_cityname": $('#from_city').text()
                			    }
 			$.ajax({
 			 type: "post",
@@ -76,6 +75,7 @@
 		}
 
 		function createTripSummaryTable(spotids, from_city, to_city){
+			$("#mapbox").css("display", "block");
 			console.log("spotids for trip summary are " + spotids);
 			getMapData(spotids);
 			global_selected_spotids = spotids;
@@ -321,12 +321,12 @@
 	<div id="to_city" hidden>{{ to_city }}</div>
 	<div id="userid" hidden>{{ userid }}</div>
 	<div class="container">
+		<div class="row" id="contents">
+			<button id="tripsummary" class="btn btn-primary" type="button">Go To Trip Summary</button>
+			<div class="row table-responsive" id="table">
+		</div>
 		<div class="row" id="mapbox">
 			<div class="col-md-6" id="map"></div>
-		</div>
-		<div class="row" id="contents">
-			<button id="tripsummary" class="btn btn-primary" type="button">Trip Summary</button>
-			<div class="row table-responsive" id="table">
 		</div>
 	</div> 
 
