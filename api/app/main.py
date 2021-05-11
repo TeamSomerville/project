@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_table import Table, Col,LinkCol, ButtonCol
 from app.db import connect, call_sp, call_fn
 from app.forms import UpdateRatingForm, SaveTripForm
@@ -51,14 +51,25 @@ def login():
         data['username'] = None
         return render_template("login.html",data=data)
     data['username'] = username
+    session["userid"] = data["userid"]
     return render_template("destination.html",userid = data["userid"])
 
 @main.route("/profile")
 def profile():
-    userid_ = 11
+    if "userid"  in session:
+      print ("xxx")
+      userid_ = session["userid"]
+    else:
+      return render_template("login.html")
+
     query = {"userid":userid_}
-    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    #response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    response = requests.post("http://172.22.152.7:5000/api/find_saved_trips", json=query)
+    print (response.text);
+    if response.text == "no trips found":
+      return render_template("profile.html", message="no trips found")	
     data = json.loads(response.text)
+    print ("data from call {}".format(data))
     ids = []
     for i in range(len(data["trips"])):
         ids.append(data["trips"][i]["tripid"])
@@ -714,7 +725,14 @@ def find_saved_trips():
     data  = request.json or {}
     print ("debug: data is {}".format(data))
     query = "select savedtripids from find_saved_trips({0})".format(data["userid"])
-    dataset= connect(query)
+    try:
+       dataset= connect(query)
+    except Exception as ex:
+       return "error when running query {}".format(query)
+
+    if (len(dataset) == 0):
+      return "no trips found"
+
     aha = dataset[0]
     datadict = {}
     trips = []
@@ -773,7 +791,7 @@ def api_find_trip_details():
     return json_data
 
 def find_trip_details(tripid):
-    query = "select userid,totalduration,totalcost,activityduration,activitycost,transportationtime,transportationcost,staycost,foodcost,toflightid,backflightid,suggestdays,suggestroutine from find_tripdetail({})".format(tripid)
+    query = "select userid,totalduration,totalcost,activityduration,activitycost,transportationtime,transportationcost,staycost,foodcost,to_cityname,from_cityname,suggestdays,suggestroutine from find_tripdetail({})".format(tripid)
     dataset= connect(query)
     returnList = [dataset[0][i] for i in range(13)] 
     return returnList
@@ -781,7 +799,7 @@ def find_trip_details(tripid):
 @main.route("/api/cal_spots", methods=["POST"])
 def cal_spots():
     """ 
-    Input Json Example
+    Inpuelect userid,totalduration,totalcost,activityduration,activitycost,transportationtime,transportationcost,staycost,foodcost,toflightid,backflightid,suggestdays,suggestroutine from find_tripdetail({}) Json Example
     {
       "spotids": [3,4,5]
     }
