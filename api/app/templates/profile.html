@@ -7,34 +7,88 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-    
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
-    <script type=text/javascript> 
-        $("#deletetrip").click({tripid:99},deletetripfunc);
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="   crossorigin=""/>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <!--this is new-->
 
-        function deletetripfunc(event) 
-        {   query = {
-				      "tripid": 99
-               		}
-            $.ajax({
-            type : "POST",
-            url : "/api/deleteusertrip",
-            dataType: "json",
-            data: JSON.stringify(query),
-            contentType: 'application/json;charset=UTF-8',
-            success: function (data) {
-                console.log(data);
-                }
-            });
-        }
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <style type="text/css">
+        #map { height: 500px; width: 100%; position:inherited; }
+	.dropdown {
+	  position: relative;
+	  display: inline-block;
+	}
+    </style>
+
+    <script type=text/javascript> 
+
+	function deleteTrip(userid, tripid){
+		$("#mapbox").css("display", "none");
+		console.log("calling delete trip with tripid " +tripid + " and userid " + userid);
+		var query = { "tripid": tripid, "userid": userid };
+		$.ajax({
+			 type: "post",
+			 data: JSON.stringify(query),
+			 contentType: "application/json",
+			 dataType: "json",
+			 url: "/api/delete_usertrip",
+			 success: function (data) {
+				console.log(data);
+				$("#frm").submit();
+			 },
+			 error: function () {
+			     console.log("error occurred");
+			 }
+			  })	
+	}
+
+	function viewTrip(tripid){
+		console.log("calling view trip with tripid " +tripid);
+		$("#mapbox").css("display", "block");
+	        getMapData(tripid);
+	}
+
+	function feedbackTrip(tripid){
+		console.log("calling feedback trip with tripid " + tripid);
+		window.location.replace("update_rating?tripid=" + tripid + "&userid=" + userid);
+	}
+
+        $(document).ready(function(){
+		$("#mapbox").css("display", "none");
+        	$("#triptable").click(function (e) {
+                        var tripid = e.target.id.substring(2);
+			console.log(tripid);
+                        var type = e.target.id.substring(0,2);
+			console.log(type);
+                        var userid = $("#userid").text();
+			if (type == "dl"){
+				//handle delete trip
+				deleteTrip(userid, tripid);
+			}
+			if (type == "vw"){
+				//handle view trip
+				viewTrip(tripid);
+			}
+			if (type == "fd"){
+				//handle feedback trip
+				feedbackTrip(tripid);
+			}
+		});
+	});
+
     </script> 
 
   <title>profile</title>
  </head>
     <body>
-        <table class="table">
+        <div id="userid" hidden>{{ userid }} </div> 
+        <div class="row" id="mapbox">
+		<div class="col-md-6" id="map"></div>
+	</div>
+        <form id="frm" action="profile">
+        <table class="table" id="triptable">
             <thead>
             <tr>
                 <th scope="col">From</th>
@@ -54,19 +108,63 @@
                 <td style="text-align:left">${{trip['totalcost']}}</td>
                 <td style="text-align:center">{{trip['suggestdays']}}</td>
                 <td style="text-align:left">
-                    <button type="button" class="btn btn-primary">view</button>
+                    <button type="button" id="vw{{trip['tripid']}}" class="btn btn-primary">view</button>
                 </td>
                 <td style="text-align:left">
-                    <button type="button" class="btn btn-success">feedback</button>
+                    <button type="button" id="fd{{trip['tripid']}}" class="btn btn-success">feedback</button>
                 </td>
                 <td style="text-align:left">
-                    <intput type="button" id=deletetrip class="btn btn-secondary"/>delete
+                    <button type="submit" id="dl{{trip['tripid']}}" class="btn btn-secondary" >delete</button>
                 </td>
             </tr>
             {% endfor %}
             </tbody>
             
-        </table>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+        </table></form>
+	<script type="text/javascript">
+	     function getMapData(tripid){
+		     var query = { "collection": "userroutes", "filter": {"tripid":parseInt(tripid)} }
+		     console.log("tripid " + tripid);
+		     $.ajax({
+			 type: "post",
+			 data: JSON.stringify(query),
+			 contentType: "application/json",
+			 dataType: "json",
+			 url: "/api/find_mongo_collection",
+			 success: function (data) {
+			     console.log(data);
+			     if (data["msg"] == "no map in mongo"){
+				$("#map").html("no map in mongo");	 	
+			     }
+			     else{
+				     var home = [data.features[0].geometry.coordinates[1],data.features[0].geometry.coordinates[0]]; 
+				     $("#mapbox").html("");
+				     $("#mapbox").html('<div class="col-md-6" id="map"></div>');
+				     var mapInstance = L.map('map').setView(home, 11);
+				     var tiles = L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=4f3hBKrjDqQGPICv8MkY", {
+					 attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
+				     });
+				     tiles.addTo(mapInstance);
+				     var pointLayer = L.geoJson(null, {
+								 pointToLayer: function(feature, latlng){
+								     label = String(feature.properties.name);
+								     return new L.CircleMarker(latlng).bindTooltip(label, {permanent: true, opacity: 1}).openTooltip(); 
+								 }
+							     });
+				     pointLayer.addData(data);
+				     mapInstance.addLayer(pointLayer);
+				}
+			 },
+			 error: function () {
+			     console.log("error occurred");
+			 }
+			  })
+	      };
+      
+	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
     </body>
 </html>{% endblock %}
