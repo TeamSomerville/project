@@ -16,7 +16,8 @@ def index():
 
 @main.route("/item/int:userid> <int:tripid>", methods=["GET", "POST"])
 def deleteusertrip(tripid):
-    userid_=11
+    print("hear")
+    userid_=12
     query = {"userid":userid_,"tripid":tripid}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/delete_usertrip", json=query)
     return profile()
@@ -33,7 +34,7 @@ def front_adduser():
          'familyname':'dog',
          'givenname':'cat',
          'birthday':'1999-10-10',
-         'homecityid':'40',
+         'homecityid':'500',
          'email':email
         }
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/add_new_user",json=query)
@@ -54,44 +55,44 @@ def login():
     session["userid"] = data["userid"]
     return render_template("destination.html",userid = data["userid"])
 
-@main.route("/profile")
+@main.route("/profile", methods=["POST", "GET"])
 def profile():
     if "userid"  in session:
       print ("xxx")
-      userid_ = session["userid"]
+      userid = session["userid"]
     else:
       return render_template("login.html")
 
-    query = {"userid":userid_}
+    query = {"userid":userid}
+    print ("query {}".format(query))
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
-    print (response.text);
+    #response = requests.post("http://172.22.152.7:5000/api/find_saved_trips", json=query)
     if response.text == "no trips found":
       return render_template("profile.html", message="no trips found")	
-    data = json.loads(response.text)
-    print ("data from call {}".format(data))
-    ids = []
-    for i in range(len(data["trips"])):
-        ids.append(data["trips"][i]["tripid"])
-    
-
-    # Declare your table
-    userid = Col("userid")
-    class SubTable(Table):
-        tripid = Col("Trip ID")
-        delete = ButtonCol("delete","main.deleteusertrip",url_kwargs=dict(userid="userid",tripid="tripid"))
-    #def update_rate()
-    items = [dict(tripid=id_,userid=userid_) for id_ in ids]
-    # Populate the table
-    table = SubTable(items)
-    return render_template("profile.html", table=table)
+    dataset = json.loads(response.text)
+    print ("dataset is {}".format(dataset))
+    dataset = dataset["trips"]
+    return render_template("profile.html",trips = dataset, userid=userid)
 
 @main.route('/update_rating', methods=["POST", "GET"])
 def ui_update_rating():
     userid  = request.args.get('userid', None)
     tripid = request.args.get('tripid', None)
-    userid = 11
-    tripid = 33
+    print ("userid {0} and tripid {1}".format(userid, tripid))
     return render_template("update.html", userid=userid, tripid=tripid)
+
+"""@main.route('/tripsummary', methods=["POST", "GET"])
+def ui_tripsummary():
+    userid  = request.args.get('userid', None)
+    tripid = request.args.get('tripid', None)
+    query = {"userid":userid}
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
+    if response.text == "no trips found":
+      return render_template("profile.html", message="no trips found")	
+    dataset = json.loads(response.text)
+    dataset = dataset["trips"]
+    print ("userid {0} and tripid {1}".format(userid, tripid))
+    return render_template("tripsummary.html", trips = userid=userid, tripid=tripid)"""
 
 @main.route('/save_trip', methods=["POST", "GET"])
 def ui_save_trip():
@@ -135,9 +136,14 @@ def ui_save_trip():
 @main.route('/destination', methods=["POST", "GET"])
 def destination():
     if request.method == "POST":
+
+       if "userid"  in session:
+         print ("xxx")
+         userid = session["userid"]
+       else:
+         return render_template("login.html")
        from_city = request.form["from_city"]
        to_city = request.form["to_city"]
-       userid = request.form["userid"]
        return redirect(url_for("main.activity", from_city=from_city, to_city=to_city, userid=userid))
     return render_template('destination.html')
 
@@ -332,6 +338,8 @@ def find_mongo_collection():
     data  = request.json or {}
     print (data["filter"])
     dataset= getCollection(collection=data["collection"], queryFilter=data["filter"])
+    if dataset.count == 0 :
+      return {"msg": "no map in mongo"}
     json_data = json.dumps(dataset[0])
     return json_data
 
@@ -739,21 +747,25 @@ def find_saved_trips():
       #get trip details
       details = find_trip_details(x)
       trip = {}
-      trip["tripid"] = x
-      trip["totalduration"] = details[1]
-      trip["totalcost"] = details[2]
-      trip["activityduration"] = details[3]
-      trip["activitycost"] = details[4]
-      trip["transportationtime"] = details[5]
-      trip["transportationcost"] = details[6]
-      trip["staycost"] = details[7]
-      trip["foodcost"] = details[8]
-      trip["toflightid"] = details[9]
-      trip["backflightid"] = details[10]
-      trip["suggestdays"] = details[11]
-      trip["suggestroutine"] = details[12]
-      trips.append(trip)
+      if details is not None:
+         trip["tripid"] = x
+         trip["totalduration"] = details[1]
+         trip["totalcost"] = details[2]
+         trip["activityduration"] = details[3]
+         trip["activitycost"] = details[4]
+         trip["transportationtime"] = details[5]
+         trip["transportationcost"] = details[6]
+         trip["staycost"] = details[7]
+         trip["foodcost"] = details[8]
+         trip["to_cityname"] = details[9]
+         trip["from_cityname"] = details[10]
+         trip["suggestdays"] = details[11]
+         trip["suggestroutine"] = details[12]
+      else:
+         trip["tripid"] = x
+         trip["msg"] =  "no trip found"
         
+      trips.append(trip)
     datadict["trips"] = trips
     json_data = json.dumps(datadict)
     return json_data
@@ -771,28 +783,34 @@ def api_find_trip_details():
     data  = request.json or {}
     #get trip details
     details = find_trip_details(data["tripid"])
-    trip = {}
-    trip["tripid"] = data["tripid"]
-    trip["totalduration"] = details[1]
-    trip["totalcost"] = details[2]
-    trip["activityduration"] = details[3]
-    trip["activitycost"] = details[4]
-    trip["transportationtime"] = details[5]
-    trip["transportationcost"] = details[6]
-    trip["staycost"] = details[7]
-    trip["foodcost"] = details[8]
-    trip["toflightid"] = details[9]
-    trip["backflightid"] = details[10]
-    trip["suggestdays"] = details[11]
-    trip["suggestroutine"] = details[12]
-        
+    if details is not None:
+	    trip = {}
+	    trip["tripid"] = data["tripid"]
+	    trip["totalduration"] = details[1]
+	    trip["totalcost"] = details[2]
+	    trip["activityduration"] = details[3]
+	    trip["activitycost"] = details[4]
+	    trip["transportationtime"] = details[5]
+	    trip["transportationcost"] = details[6]
+	    trip["staycost"] = details[7]
+	    trip["foodcost"] = details[8]
+	    trip["toflightid"] = details[9]
+	    trip["backflightid"] = details[10]
+	    trip["suggestdays"] = details[11]
+	    trip["suggestroutine"] = details[12]
+    else:
+	    trip = {"msg": "no trip found"}    
     json_data = json.dumps(trip)
     return json_data
 
 def find_trip_details(tripid):
     query = "select userid,totalduration,totalcost,activityduration,activitycost,transportationtime,transportationcost,staycost,foodcost,to_cityname,from_cityname,suggestdays,suggestroutine from find_tripdetail({})".format(tripid)
+    print ("query {}".format(query))
     dataset= connect(query)
-    returnList = [dataset[0][i] for i in range(13)] 
+    if len(list(dataset)) > 0:
+       returnList = [dataset[0][i] for i in range(13)] 
+    else:
+       returnList = None
     return returnList
 
 @main.route("/api/cal_spots", methods=["POST"])
