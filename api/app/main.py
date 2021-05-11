@@ -63,8 +63,7 @@ def profile():
       return render_template("login.html")
 
     query = {"userid":userid_}
-    #response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
-    response = requests.post("http://172.22.152.7:5000/api/find_saved_trips", json=query)
+    response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
     print (response.text);
     if response.text == "no trips found":
       return render_template("profile.html", message="no trips found")	
