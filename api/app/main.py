@@ -16,7 +16,8 @@ def index():
 
 @main.route("/item/int:userid> <int:tripid>", methods=["GET", "POST"])
 def deleteusertrip(tripid):
-    userid_=11
+    print("hear")
+    userid_=12
     query = {"userid":userid_,"tripid":tripid}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/delete_usertrip", json=query)
     return profile()
@@ -33,7 +34,7 @@ def front_adduser():
          'familyname':'dog',
          'givenname':'cat',
          'birthday':'1999-10-10',
-         'homecityid':'40',
+         'homecityid':'500',
          'email':email
         }
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/add_new_user",json=query)
@@ -58,40 +59,25 @@ def login():
 def profile():
     if "userid"  in session:
       print ("xxx")
-      userid_ = session["userid"]
+      userid = session["userid"]
     else:
       return render_template("login.html")
 
-    query = {"userid":userid_}
+    query = {"userid":userid}
     response = requests.post("http://sp21-cs411-07.cs.illinois.edu/api/find_saved_trips", json=query)
-    print (response.text);
     if response.text == "no trips found":
       return render_template("profile.html", message="no trips found")	
-    data = json.loads(response.text)
-    print ("data from call {}".format(data))
-    ids = []
-    for i in range(len(data["trips"])):
-        ids.append(data["trips"][i]["tripid"])
-    
+    dataset = json.loads(response.text)
+    dataset = dataset["trips"]
+    return render_template("profile.html",trips = dataset)
 
-    # Declare your table
-    userid = Col("userid")
-    class SubTable(Table):
-        tripid = Col("Trip ID")
-        delete = ButtonCol("delete","main.deleteusertrip",url_kwargs=dict(userid="userid",tripid="tripid"))
-    #def update_rate()
-    items = [dict(tripid=id_,userid=userid_) for id_ in ids]
-    # Populate the table
-    table = SubTable(items)
-    return render_template("profile.html", table=table)
-
-@main.route('/update_rating', methods=["POST", "GET"])
+'''@main.route('/update_rating', methods=["POST", "GET"])
 def ui_update_rating():
     userid  = request.args.get('userid', None)
     tripid = request.args.get('tripid', None)
     userid = 11
     tripid = 33
-    return render_template("update.html", userid=userid, tripid=tripid)
+    return render_template("update.html", userid=userid, tripid=tripid)'''
 
 @main.route('/save_trip', methods=["POST", "GET"])
 def ui_save_trip():
@@ -748,8 +734,8 @@ def find_saved_trips():
       trip["transportationcost"] = details[6]
       trip["staycost"] = details[7]
       trip["foodcost"] = details[8]
-      trip["toflightid"] = details[9]
-      trip["backflightid"] = details[10]
+      trip["to_cityname"] = details[9]
+      trip["from_cityname"] = details[10]
       trip["suggestdays"] = details[11]
       trip["suggestroutine"] = details[12]
       trips.append(trip)
