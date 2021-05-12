@@ -539,6 +539,7 @@ def find_many_spot_details():
        datadict["website"] = item[14]
        datadict["category"] = item[15]
        datadict["state"] = item[16]
+       datadict["covidfactor"] = item[17]
        ls.append(datadict)
     json_data = json.dumps(ls)
     return json_data

@@ -26,19 +26,6 @@
 			var to_city = $('#to_city').text();
 			var userid = $('#userid').text();
 			getSpotsForCity(to_city);
-			$("#tripsummary").click(function (e) {
-				console.log("my button clicked");
-				//loop through the table
-				var spotids = [];
-				$('#table1 tbody tr').each( function(i) {
-					var chkbox = $(this).find('input[type="checkbox"]');
-					if (chkbox.prop("checked")){
-						var spotid = chkbox.prop("id").substring(3);
-						spotids.push(spotid);
-					}
-				});
-				createTripSummaryTable(spotids, from_city, to_city);
-			});
 		});
 
 		function saveTrip(){
@@ -191,6 +178,22 @@
 			  })	
 		}
 
+		function btnSummary_clicked(e) {
+			
+			console.log("my button clicked");
+			var from_city = $("#from_city").text();
+			var to_city = $("#to_city").text();
+			//loop through the table
+			var spotids = [];
+			$('#table1 tbody tr').each( function(i) {
+				var chkbox = $(this).find('input[type="checkbox"]');
+				if (chkbox.prop("checked")){
+					var spotid = chkbox.prop("id").substring(3);
+					spotids.push(spotid);
+				}
+			});
+			createTripSummaryTable(spotids, from_city, to_city);
+		}
 		function getSpotDetails(spotids){
 			console.log("spotids are " + spotids);
 			query = {"spotids": spotids, "userid": 11}
@@ -287,7 +290,19 @@
 					tbody.appendChild(tr);
 				});
 				table.appendChild(tbody);
-				document.getElementById("table").appendChild(table);
+				var parentTable = document.createElement("div");
+				parentTable.id = "table";
+				parentTable.setAttribute("class","row table-responsive");
+				parentTable.appendChild(table);
+				var btnSummary = document.createElement("button");
+				btnSummary.id = "tripsummary";
+				btnSummary.setAttribute("class", "btn btn-primary");
+				btnSummary.setAttribute("type", "button");
+				btnSummary.innerHTML = "Go To Trip Summary (Covid factor:" + data[0]["covidfactor"] + ")";
+				var content = document.getElementById("contents");
+				btnSummary.addEventListener("click", btnSummary_clicked);
+				content.appendChild(btnSummary);
+				content.appendChild(parentTable);
 			 },
 			 error: function () {
 			     console.log("error occurred");
@@ -322,8 +337,6 @@
 	<div id="userid" hidden>{{ userid }}</div>
 	<div class="container">
 		<div class="row" id="contents">
-			<button id="tripsummary" class="btn btn-primary" type="button">Go To Trip Summary</button>
-			<div class="row table-responsive" id="table">
 		</div>
 		<div class="row" id="mapbox">
 			<div class="col-md-6" id="map"></div>
