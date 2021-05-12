@@ -77,8 +77,6 @@
 		function createTripSummaryTable(spotids, from_city, to_city){
 			$("#mapbox").css("display", "block");
 			console.log("spotids for trip summary are " + spotids);
-			getMapData(spotids);
-			global_selected_spotids = spotids;
 			query = {"spotids": spotids, "from_city": from_city, "to_city": to_city}
 			$.ajax({
 			 type: "post",
@@ -99,6 +97,8 @@
 					document.getElementById("contents").appendChild(save);
 				}
 				
+				global_selected_spotids = data["routine"];
+				getMapData(data["routine"]);
 				var table = document.createElement("table");
 				table.id = "table2";
 				table.class = "table table-bordered";
