@@ -166,7 +166,7 @@
 				tr.appendChild(activityduration);
 				var othercost = document.createElement("td");
 				othercost.id = "othercost";
-				othercost.innerHTML = data["othercost"];
+				othercost.innerHTML = data["othercost"].toFixed(3);
 				tr.appendChild(othercost);
 				tbody.appendChild(tr);
 				table.appendChild(tbody);
@@ -298,7 +298,7 @@
 				btnSummary.id = "tripsummary";
 				btnSummary.setAttribute("class", "btn btn-primary");
 				btnSummary.setAttribute("type", "button");
-				btnSummary.innerHTML = "Go To Trip Summary (Covid factor:" + data[0]["covidfactor"] + ")";
+				btnSummary.innerHTML = "Go To Trip Summary (Covid factor:" + data[0]["covidfactor"].toFixed(2) + ")";
 				var content = document.getElementById("contents");
 				btnSummary.addEventListener("click", btnSummary_clicked);
 				content.appendChild(btnSummary);
