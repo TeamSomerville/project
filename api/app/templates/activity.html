@@ -135,7 +135,7 @@
 				var tr = document.createElement("tr");
 				var totalcost = document.createElement("td");
 				totalcost.id = "totalcost";
-				totalcost.innerHTML = data["totalcost"];
+				totalcost.innerHTML = data["totalcost"].toFixed(3);
 				tr.appendChild(totalcost);
 				var suggestdays = document.createElement("td");
 				suggestdays.id = "suggestdays";
@@ -143,7 +143,7 @@
 				tr.appendChild(suggestdays);
 				var avgrating = document.createElement("td");
 				avgrating.id = "avgrating";
-				avgrating.innerHTML = data["avgrating"];
+				avgrating.innerHTML = data["avgrating"].toFixed(3);
 				tr.appendChild(avgrating);
 				var totalactivities = document.createElement("td");
 				totalactivities.innerHTML = data["totalactivities"];
@@ -154,11 +154,11 @@
 				tr.appendChild(flightduration);
 				var flightcost = document.createElement("td");
 				flightcost.id = "flightcost";
-				flightcost.innerHTML = data["flightcost"];
+				flightcost.innerHTML = data["flightcost"].toFixed(3);
 				tr.appendChild(flightcost);
 				var activitycost = document.createElement("td");
 				activitycost.id = "activitycost";
-				activitycost.innerHTML = data["activitycost"];
+				activitycost.innerHTML = data["activitycost"].toFixed(3);
 				tr.appendChild(activitycost);
 				var activityduration = document.createElement("td");
 				activityduration.id = "activityduration";
