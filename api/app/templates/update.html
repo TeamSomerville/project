@@ -117,7 +117,7 @@
 						tr.appendChild(address);
 						var rating = document.createElement("td");
 						rating.id = spot["spotid"];
-						rating.innerHTML = spot["rating"];
+						rating.innerHTML = spot["rating"].toFixed(3);
 						tr.appendChild(rating);
 						var newrating = document.createElement("td");
 						newrating.id = "new" + spot["spotid"];
@@ -172,7 +172,7 @@
 			 success: function (data) {
 				console.log(data);
 				//populate the row rating
-				$('#'+spotid).html(data["rating"]);	
+				$('#'+spotid).html(data["rating"].toFixed(3));	
 				$('#new'+spotid).html("");	
 
 			 },
