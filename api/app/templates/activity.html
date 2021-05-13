@@ -135,7 +135,7 @@
 				var tr = document.createElement("tr");
 				var totalcost = document.createElement("td");
 				totalcost.id = "totalcost";
-				totalcost.innerHTML = data["totalcost"].toFixed(3);
+				totalcost.innerHTML = data["totalcost"].toFixed(2);
 				tr.appendChild(totalcost);
 				var suggestdays = document.createElement("td");
 				suggestdays.id = "suggestdays";
@@ -143,7 +143,7 @@
 				tr.appendChild(suggestdays);
 				var avgrating = document.createElement("td");
 				avgrating.id = "avgrating";
-				avgrating.innerHTML = data["avgrating"].toFixed(3);
+				avgrating.innerHTML = data["avgrating"].toFixed(2);
 				tr.appendChild(avgrating);
 				var totalactivities = document.createElement("td");
 				totalactivities.innerHTML = data["totalactivities"];
@@ -154,11 +154,11 @@
 				tr.appendChild(flightduration);
 				var flightcost = document.createElement("td");
 				flightcost.id = "flightcost";
-				flightcost.innerHTML = data["flightcost"].toFixed(3);
+				flightcost.innerHTML = data["flightcost"].toFixed(2);
 				tr.appendChild(flightcost);
 				var activitycost = document.createElement("td");
 				activitycost.id = "activitycost";
-				activitycost.innerHTML = data["activitycost"].toFixed(3);
+				activitycost.innerHTML = data["activitycost"].toFixed(2);
 				tr.appendChild(activitycost);
 				var activityduration = document.createElement("td");
 				activityduration.id = "activityduration";
@@ -166,7 +166,7 @@
 				tr.appendChild(activityduration);
 				var othercost = document.createElement("td");
 				othercost.id = "othercost";
-				othercost.innerHTML = data["othercost"].toFixed(3);
+				othercost.innerHTML = data["othercost"].toFixed(2);
 				tr.appendChild(othercost);
 				tbody.appendChild(tr);
 				table.appendChild(tbody);
@@ -276,10 +276,10 @@
 					suggesthours.innerHTML = spot["suggesthours"];
 					tr.appendChild(suggesthours);
 					var cost = document.createElement("td");
-					cost.innerHTML = spot["cost"].toFixed(3);
+					cost.innerHTML = spot["cost"].toFixed(2);
 					tr.appendChild(cost);
 					var rating = document.createElement("td");
-					rating.innerHTML = spot["rating"].toFixed(3);
+					rating.innerHTML = spot["rating"].toFixed(2);
 					tr.appendChild(rating);
 					var category = document.createElement("td");
 					category.innerHTML = spot["category"];
